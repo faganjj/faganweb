@@ -1,20 +1,29 @@
 {% extends "learning_logs/base.html" %}
 
-{% block page-header %}
+{% block page_header %}
   <h3>{{ topic }}</h3>
-{% endblock page-header %} 
+{% endblock page_header %} 
 
 {% block content %}
   <p>
+    {% if topic.owner == request.user %}
     <a href="{% url 'learning_logs:new_entry' topic.id %}">Add new entry</a>
+    {% endif %}
   </p>
 
   {% for entry in entries %}
     <div class="card mb-3">
       <h4 class="card-header">
         {{ entry.date_added|date:'M d, Y H:i' }}
-        <small><a href="{% url 'learning_logs:edit_entry' entry.id %}">
-            edit entry</a></small>
+        {% if topic.owner == request.user %}
+        <small>
+        &nbsp; <a href="{% url 'learning_logs:edit_entry' entry.id %}">
+            edit entry</a>
+        &nbsp; <a href="{% url 'learning_logs:delete_entry' entry.id %}" 
+            onclick="return confirm('Are you sure you want to delete this entry?')">
+            delete entry</a>
+        </small>
+        {% endif %}
       </h4>
       <div class="card-body">
         {{ entry.text|linebreaks }}

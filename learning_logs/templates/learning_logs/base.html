@@ -24,8 +24,10 @@
     <div class="collapse navbar-collapse" id="navbarCollapse">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'learning_logs:topics'%}">
-              Topics</a></li>
+          <a class="nav-link" href="{% url 'learning_logs:topics' 'my'%}">
+              My Topics</a></li>
+          <a class="nav-link" href="{% url 'learning_logs:topics' 'all'%}">
+              All Topics</a></li>
       </ul>
       <ul class="navbar-nav ml-auto">
         {% if user.is_authenticated %}
