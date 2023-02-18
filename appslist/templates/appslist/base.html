@@ -1,0 +1,28 @@
+{% load bootstrap4 %}
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1,
+    shrink-to-fit=no">
+  <title>FaganWeb Apps</title>
+
+  {% bootstrap_css %}
+  {% bootstrap_javascript jquery='full' %}
+
+</head>
+<body>
+
+  <main role="main" class="container">
+    <div class="pb-2 mb-2 border-bottom">
+      {% block page_header %}{% endblock page_header %}
+    </div>
+    <div class="pb-2 mb-2 border-bottom">
+      {% block content %}{% endblock content %}
+    </div>
+  </main>
+
+</body>
+
+</html>

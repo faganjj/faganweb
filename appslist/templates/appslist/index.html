@@ -1,0 +1,25 @@
+{% extends "appslist/base.html" %}
+
+{% block page_header %}
+  <h3>FaganWeb Applications</h3>
+  <p>This site contains a set of apps developed by Sean and John Fagan.
+{% endblock page_header %} 
+
+{% block content %}
+
+  {% for app in apps %}
+    <div class="card mb-3">
+      <h4 class="card-header">
+        {% if app.active %}
+        <a href="{% url app.appname|add:':index' %}">{{ app.title }}</a>
+        {% else %}
+        <p>{{app.title}}</p>
+        {% endif %}
+      </h4>
+      <div class="card-body">
+        {{ app.text|linebreaks }}
+      </div>
+    </div>
+  {% endfor %}
+
+{% endblock content %}

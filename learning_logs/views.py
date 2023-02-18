@@ -27,7 +27,7 @@ def topics(request, scope):
 
 @login_required
 def topic(request, topic_id):
-	""" Show a single topic nd all it's entries """
+	""" Show a single topic and all it's entries """
 	topic = Topic.objects.get(id=topic_id)
 	# Make sure the topic belongs to the current user
 	#if topic.owner != request.user:
