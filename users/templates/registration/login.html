@@ -1,10 +1,10 @@
-{% extends "learning_logs/base.html" %}
+{% extends "appslist/base.html" %}
 {% load bootstrap4 %}
 
-{% block page-header %}
-  <h2>Log into your account.</h2>
-{% endblock page-header %}
-
+{% block page_header %}
+  <h2>You will need to login to your accout to continue.</h2>
+  <h5>If you don't already have a FaganWeb account, click "Register" on the navigation bar above.</h5>
+{% endblock page_header %}
 
 {% block content %}
 
@@ -15,8 +15,8 @@
     <button name="submit" class="btn btn-primary">Log in</button>
   {% endbuttons %}
 
-  <input type="hidden" name="next"
-  	value="{% url 'learning_logs:index' %}" />
+  <input type="hidden" name="next" value="{{ next }}">
+
 </form>
 
 {% endblock content %}

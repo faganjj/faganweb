@@ -1,4 +1,9 @@
-{% extends "learning_logs/base.html" %}
+{% extends "appslist/base.html" %}
+
+{% block page_header %}
+  <h2>Register your FaganWeb account</h2>
+{% endblock page_header %}
+
 
 {% block content %}
 
@@ -11,7 +16,7 @@
   {{ form.as_p }}
 
   <button name="submit">Register</button>
-  <input type="hidden" name="next" value="{% url 'learning_logs:index' %}" />
+  <input type="hidden" name="next" value="{% url 'appslist:index' %}" />
 </form>
 
 {% endblock content %}

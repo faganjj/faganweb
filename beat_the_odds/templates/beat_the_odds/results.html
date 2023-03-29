@@ -1,0 +1,96 @@
+{% extends "beat_the_odds/base.html" %}
+
+{% block page_header %}
+
+<h2 class="text-center">Results for {{ user.username }}</h2>
+<form action="{% url 'beat_the_odds:results' %}" method="post">
+  {% csrf_token %}
+  <label class="lead" for="league">Select a league:</label>
+  <select name="league" id="league">
+    <option value="NFL"{% if league == "NFL" %}selected{% endif %}>NFL</option>
+    <option value="MLB"{% if league == "MLB" %}selected{% endif %}>MLB</option>
+  </select>
+  <br>
+  <input class="btn btn-sm btn-primary" type="submit" value="Show Results" />
+</form>
+<br>
+
+{% include 'beat_the_odds/includes/messages.html' %}
+
+{% endblock page_header %} 
+
+{% block content %}
+
+{% if period != null %}
+
+<h4>{{ league }} {{ season }} - {{ period }}</h4>
+<br>
+<h5>Game Results</h5>
+<br>
+
+<table class="table">
+<thead>
+  <tr>
+    <th scope="col">Date</th>
+    <th scope="col"></th>
+    <th scope="col">Visiting Team</th>
+    <th scope="col" class="text-center">Score</th>
+    <th scope="col" class="text-center">W-L-T</th>
+    <th scope="col" class="text-right">Points</th>
+    <th scope="col"></th>
+    <th scope="col">Home Team</th>
+    <th scope="col" class="text-center">Score</th>
+    <th scope="col" class="text-center">W-L-T</th>
+    <th scope="col" class="text-right">Points</th>
+  </tr>
+</thead>
+<tbody>
+
+{% for game in games %}
+
+<tr>
+
+  {% if game.picked_away == True or game.picked_home == True%}
+
+    <td>{{ game.game_date|date:"SHORT_DATE_FORMAT" }}</td>
+    {% if game.picked_away == True %}
+    <td class="pl-5"><input type=checkbox name="picks" value="{{ game.team_away }}" checked></td>
+    {% else %}
+      <td class="pl-5"><input type=checkbox name="picks" value="{{ game.team_away }}"></td>
+    {% endif %}
+      <td>{{ game.name_away }}</td>
+      <td class="text-center">{{ game.score_away }}</td>
+      <td class="text-center">{{ game.outcome_away }}</td>
+    {% if game.picked_away == True %}
+      <td class="text-right">{{ game.mypoints_away }}</td>
+    {% else %}
+      <td></td>
+    {% endif %}
+    {% if game.picked_home == True %}
+      <td class="pl-5"><input type=checkbox name="picks" value="{{ game.team_home }}" checked="true"></td>
+    {% else %}
+      <td class="pl-5"><input type=checkbox name="picks" value="{{ game.team_home }}"></td>
+    {% endif %}
+      <td>{{ game.name_home }}</td>
+      <td class="text-center">{{ game.score_home }}</td>
+      <td class="text-center">{{ game.outcome_home }}</td>
+    {% if game.picked_home == True %}
+      <td class="text-right">{{ game.mypoints_home }}</td>
+    {% else %}
+      <td></td>
+    {% endif %}
+
+</tr>
+
+  {% endif %}
+
+{% endfor %}  
+
+</tbody>
+</table>
+
+<h5 {% if mytotal < 0 %}class="text-danger"{% endif %}> Total Points = {{ mytotal }} </h5>
+
+{% endif %}
+
+{% endblock content %}

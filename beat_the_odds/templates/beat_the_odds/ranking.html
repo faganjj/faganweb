@@ -1,0 +1,64 @@
+{% extends "beat_the_odds/base.html" %}
+
+{% block page_header %}
+
+<h2 class="text-center">Participant Ranking</h2>
+<br>
+<form action="{% url 'beat_the_odds:ranking' %}" method="post">
+  {% csrf_token %}
+  <label class="lead" for="league">Select league:</label>
+  <select name="league" id="league">
+    <option value="NFL"{% if league == "NFL" %}selected{% endif %}>NFL</option>
+    <option value="MLB"{% if league == "MLB" %}selected{% endif %}>MLB</option>
+  </select>
+  <br>
+  <label class="lead" for="scope">Select scope:</label>  
+  <select name="scope" id="scope">
+    <option value="contest">Latest Contest</option>
+    <option value="season">Season To-Date</option>
+  </select>
+  <br>
+  <input class="btn btn-sm btn-primary" type="submit" value="Show Ranking" />
+</form>
+<br>
+
+{% include 'beat_the_odds/includes/messages.html' %}
+
+{% endblock page_header %} 
+
+{% block content %}
+
+{% if scope == "contest" %}
+  <h4>{{ league }} {{ season }} - {{ period }}</h4>
+{% elif scope == "season" %}
+  <h4>{{ season }} Season To-Date</h4>
+{% endif %}
+
+{% if results %}
+
+<br>
+<table class="table table-sm">
+<thead>
+  <tr>
+    <th scope="col" class="w-25">Participant</th>
+    <th scope="col" class="text-right">Points</th>
+    <th scope="col" class="text-center">Wins</th>
+    <th scope="col" class="text-center">Losses</th>  
+    <th scope="col" class="text-center">Ties</th>  
+  </tr>
+</thead>
+<tbody>
+
+{% for result in results %}
+<tr {% if result.participant == request.user %} class="table-active" {% endif %}>
+  <td> {{ result.participant.username }}</td>
+  <td class="text-right {% if result.points < 0 %}text-danger{% endif %}">{{ result.points }}</td>
+  <td class="text-center">{{ result.wins }}</td>
+  <td class="text-center">{{ result.losses }}</td>
+  <td class="text-center">{{ result.ties }}</td>
+</tr>
+{% endfor %}
+
+{% endif %}
+
+{% endblock content %}

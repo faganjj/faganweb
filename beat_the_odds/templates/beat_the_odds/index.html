@@ -1,0 +1,102 @@
+{% extends "beat_the_odds/base.html" %}
+
+{% block content %}
+
+  <div class="jumbotron pt-4 pb-4">
+  	<h2 class="display-3 d-inline">Beat the Odds</h2>
+
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary mb-5 float-right" data-toggle="modal" data-target="#exampleModal">
+  Learn More
+</button>
+
+<!-- Modal -->
+<div class="modal fade bd-example-modal-lg" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="exampleModalLabel">What is Moneyline?</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>With a Moneyline bet, unlike with points spreads, you simply pick who you think is going to win
+        the game.  But your payout will vary, depending on whether you pick the favorite or the underdog, 
+      	and whether the favorite is heavily favored or not.</p>
+
+      	<p>The favorite is listed with “-” Moneyline odds, and the underdog is listed with “+” Moneyline 
+      	odds.<br>
+      	For teams with "+" odds, the payout formula is: &nbsp (Odds/100) * Wager + Wager<br>
+      	For teams with "-" odds, the payout formula is: &nbsp (100/Odds) * Wager + Wager</p>  
+
+      	<p>Example #1: The Chiefs are playing the Bills, and the Chiefs are slight favorites.<br>
+      	You might see odds like: Chiefs (-135), Bills (+115)</p>
+      	
+      	<p>Let's assume you bet $100 on the Bills:<br>
+      	- If they win, your payout is &nbsp (115/100) * 100 + 100 = $215. &nbsp So, your profit is $115.<br>
+				- If they lose, your payout is $0.  And your profit is -$100.  (i.e. You lose your $100 bet)<br>
+				Now, let's assume you bet $100 on the Chiefs:<br>
+      	- If they win, your payout is &nbsp 100/115 * 100 + 100 = $187. &nbsp So, your profit is $87.<br>
+				- If they lose, your payout is $0.  And your profit is -$100.</p>
+
+      	<p>Example #2: The Eagles are playing the Lions, and the Eagles are heavy favorites.<br>
+      	You might see odds like: Eagles (-1000), Lions (+500)</p>
+      	
+      	<p>Let's assume you bet $50 on the Lions:<br>
+      	- If they win, your payout is &nbsp (500/100) * 50 + 50 = $300. &nbsp So, your profit is $250.<br>
+				- If they lose, your payout is $0.  And your profit is -$100.<br>
+				Now, let's assume you bet $50 on the Eagles:<br>
+      	- If they win, your payout is &nbsp 100/1000 * 50 + 50 = $55. &nbsp So, your profit is $5.<br>
+				- If they lose, your payout is $0.  And your profit is -$100.</p>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+  	<p class="lead">Compete against other participants to see who 
+  		can accumulate the most points by picking the winners of NFL 
+  		or MLB games using Moneyline odds (not point spreads). To 
+  		participate, you'll need to register a username and password.</p>
+
+  	<p class="lead">Choose "NFL" or "MLB" from the selection list  
+  		below and click "Make Picks".  You'll be asked to pick the 
+  		winners of 5 games for a weekend of NFL games or a day of MLB 
+  		games.</p>
+
+  	<p class="lead">There's no money involved with this game, but 
+  		the points you receive will be the equivalent of placing a 
+  		$100 bet on each game.  Your total points at the end of the 
+  		contest will be equivalent to your net profit or loss.</p>
+
+  	<p class="lead">At the end of the contest, click "Results" on 
+  		the navigation bar above to see the resuls of your picks.  To
+  		see how you did relative to other participants, click 
+  		"Ranking".  To return to this page from any other page, click 
+  		"Beat the Odds".</p>
+
+  </div>
+
+  	<form action="{% url 'beat_the_odds:index' %}" method='post'>
+  		{% csrf_token %}
+  		<label class="lead" for="league">Select a league:</label>
+			<select name="league" id="league">
+			  <option value="NFL" {% if league == "NFL" %}selected{% endif %}>NFL</option>
+			  <option value="MLB" {% if league == "MLB" %}selected{% endif %}>MLB</option>
+			</select>
+			<!--
+			<select name="league" id="league" class="input-lg">
+				<option selected hidden>Select league</option></option>
+			  <option value="NFL">NFL</option>
+			  <option value="MLB">MLB</option>
+			</select>
+			-->
+			<br><br>
+			<input class="btn btn-lg btn-primary" type="submit" value="Make or Change Picks" />
+		</form>
+		<br>
+
+{% include 'beat_the_odds/includes/messages.html' %}
+
+{% endblock content %}

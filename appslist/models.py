@@ -12,4 +12,4 @@ class App(models.Model):
 
 	def __str__(self):
 		""" Return a short string representation of the app """
-		return f"{self.text[:50]}..."
+		return f"{self.appname} - {self.text[:50]}..."

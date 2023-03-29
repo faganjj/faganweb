@@ -1,0 +1,50 @@
+{% extends "beat_the_odds/base.html" %}
+
+{% block page_header %}
+
+<h2 class="text-center">Tally Results</h2>
+<h5>Active Contests:</h5>
+<form action="{% url 'beat_the_odds:tally' %}" method="post">
+{% csrf_token %}
+{% for contest in contests %}
+  <input type="radio" id="{{ contest.id }}" name="contest" value="{{ contest.id }}">
+  <label for="{{ contest.id }}">{{ contest.league }} {{ contest.season }} - {{ contest.period }}</label><br>
+{% endfor %}
+  <br>
+  <input class="btn btn-lg btn-primary" type="submit" value="Tally" />
+</form>
+<br>
+
+{% endblock page_header %} 
+
+{% block content %}
+
+<!--
+<br><br>
+<h5>Ranking</h5>
+<br>
+
+<table class="table">
+<thead>
+  <tr>
+    <th scope="col">Participant</th>
+    <th scope="col" class="text-right">Points</th>
+    <th scope="col" class="text-center">W-L-T</th>
+  </tr>
+</thead>
+<tbody>
+
+{% for participant in participants %}
+<tr>
+  <td>{{ participant.username }}</td>
+  <td class="text-right">{{ participant.points }}</td>
+  <td class="text-center">{{ participant.wlt }}</td>
+</tr>
+{% endfor %}  
+
+-->
+
+
+{% include 'beat_the_odds/includes/messages.html' %}
+
+{% endblock content %}
