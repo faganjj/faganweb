@@ -66,6 +66,9 @@ class Result(models.Model):
 	def __str__(self):
 		return f"{self.participant.username}  ({self.contest.league} - {self.contest.season} - {self.contest.period})"	
 
+	class Meta:
+		permissions = (("tally_results", "Tally results"),)
+
 class Pick(models.Model):
 	contest = models.ForeignKey(Contest, on_delete=models.CASCADE)
 	participant = models.ForeignKey(User, on_delete=models.CASCADE)

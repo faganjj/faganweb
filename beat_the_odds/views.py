@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.http import Http404
 from datetime import date
@@ -227,6 +227,7 @@ def ranking(request):
 
 
 @login_required
+@permission_required('beat_the_odds.tally_results', raise_exception=True)
 def tally(request):
 	""" Create a form to tally the results of a contest """
 
