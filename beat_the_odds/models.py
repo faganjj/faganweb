@@ -37,7 +37,7 @@ class Team(models.Model):
 	name = models.CharField(max_length=30)
 
 	def __str__(self):
-		return f"{self.abbrev} - {self.name}"
+		return f"{self.league}:  {self.abbrev} - {self.name}"
  
 class Game(models.Model):
 	contest = models.ForeignKey(Contest, on_delete=models.CASCADE)
@@ -53,7 +53,7 @@ class Game(models.Model):
 	outcome_home = models.CharField(max_length=1, blank=True)
 
 	def __str__(self):
-		return f"{self.game_date}: {self.team_away} at {self.team_home}"
+		return f"{self.game_date}: {self.team_away} ({self.odds_away})  at  {self.team_home} ({self.odds_home})"
 
 class Result(models.Model):
 	participant = models.ForeignKey(User, on_delete=models.CASCADE)
