@@ -120,13 +120,13 @@ def makepicks(request, league):
 		if len(picks) > 0:
 			if abbrev_away in mypicks:
 				game.picked_away = True
-		team_away = Team.objects.get(abbrev=abbrev_away)
+		team_away = Team.objects.get(league=league, abbrev=abbrev_away)
 		game.name_away = team_away.name
 		abbrev_home = game.team_home
 		if len(picks) > 0:
 			if abbrev_home in mypicks:
 				game.picked_home = True
-		team_home = Team.objects.get(abbrev=abbrev_home)
+		team_home = Team.objects.get(league=league, abbrev=abbrev_home)
 		game.name_home = team_home.name
 		if game.odds_away > 0:
 			game.points_away = game.odds_away
