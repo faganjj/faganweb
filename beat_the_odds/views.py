@@ -112,15 +112,11 @@ def makepicks(request, league):
 	# if the gsme can be legitimately picked.
 	compare_date = date.today()
 	compare_time = time.localtime()
-	print(compare_date)
-	print(compare_time)
 	# But if the contest record has been created for test purposes, set the 
 	# compare date to an arbitrary date in the past.
 	if contest.test_contest:
 		compare_date = date(2000,1,1)
 	for game in games:
-		print(game.game_date)
-		print(game.game_time)
 		abbrev_away = game.team_away
 		if len(mypicks) > 0:
 			if abbrev_away in mypicks:
