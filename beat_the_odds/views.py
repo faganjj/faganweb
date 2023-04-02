@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.http import Http404
 from datetime import datetime, date
 from django.db.models import Sum
+import time
 
 from .models import Contest, Team, Game, Result, Pick, User
 # from .forms import PicksForm
@@ -110,12 +111,16 @@ def makepicks(request, league):
 	# Get today's date.  It will be compared to each game date, to determine
 	# if the gsme can be legitimately picked.
 	compare_date = date.today()
-	compare_time = datetime.now().time() 
+	compare_time = time.localtime()
+	print(compare_date)
+	print(compare_time)
 	# But if the contest record has been created for test purposes, set the 
 	# compare date to an arbitrary date in the past.
 	if contest.test_contest:
 		compare_date = date(2000,1,1)
 	for game in games:
+		print(game.game_date)
+		print(game.game_time)
 		abbrev_away = game.team_away
 		if len(mypicks) > 0:
 			if abbrev_away in mypicks:
