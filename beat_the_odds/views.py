@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.http import Http404
-from datetime import date
+from datetime import datetime, date
 from django.db.models import Sum
 
 from .models import Contest, Team, Game, Result, Pick, User
@@ -110,10 +110,11 @@ def makepicks(request, league):
 	# Get today's date.  It will be compared to each game date, to determine
 	# if the gsme can be legitimately picked.
 	compare_date = date.today()
+	compare_time = datetime.now().time() 
 	# But if the contest record has been created for test purposes, set the 
 	# compare date to an arbitrary date in the past.
 	if contest.test_contest:
-		compare_date = date(2000, 1, 1)
+		compare_date = date(2000,1,1)
 	for game in games:
 		abbrev_away = game.team_away
 		if len(picks) > 0:
