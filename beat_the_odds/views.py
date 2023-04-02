@@ -153,7 +153,7 @@ def results(request):
 		contest = Contest.objects.order_by('-id')[0]
 	except:
 		messages.error(request, "No results yet")
-		return redirect('beat_the_odds: index')	
+		return redirect('beat_the_odds:index')	
 	league = contest.league
 	context = {'league': league}
 	# Check if the "Show Results" button has been clicked. If so, display
@@ -237,8 +237,6 @@ def ranking(request):
 		messages.error(request, "No results yet")
 		return redirect('beat_the_odds: index')	
 	league = contest.league
-	season = contest.season
-	period = contest.period
 	context = {'league': league}
 	# Check if the "Show Ranking" button has been clicked. If so, display ranking.
 	if request.method == 'POST':
@@ -252,6 +250,8 @@ def ranking(request):
 			message = "No " + league + " results yet"
 			messages.warning(request, message)
 			return redirect('beat_the_odds:ranking')
+		season = contest.season
+		period = contest.period
 		# If "Latest Contest" was selected from the scope dropdown, display the ranking
 		# for the latest contest. Otherwise, display ranking for season to-date.
 		if scope == "contest":
