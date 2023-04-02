@@ -165,7 +165,7 @@ def results(request):
 		try:
 			contest = Contest.objects.filter(league=league, status='Complete').order_by('-id')[0]
 		except:
-			message = "No " + league + "No results yet"
+			message = "No " + league + " results yet"
 			messages.warning(request, message)
 			return redirect('beat_the_odds:results')
 		user = request.user
@@ -249,9 +249,9 @@ def ranking(request):
 		try:
 			contest = Contest.objects.filter(league=league, status='Complete').order_by('-id')[0]
 		except:
-			message = "No " + league + "No results yet"
+			message = "No " + league + " results yet"
 			messages.warning(request, message)
-			return redirect('beat_the_odds:results')
+			return redirect('beat_the_odds:ranking')
 		# If "Latest Contest" was selected from the scope dropdown, display the ranking
 		# for the latest contest. Otherwise, display ranking for season to-date.
 		if scope == "contest":

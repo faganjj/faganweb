@@ -2,7 +2,7 @@
 
 {% block page_header %}
 {% include 'beat_the_odds/includes/messages.html' %}
-  <h3 class="text-center">{{ league }} {{ season }} - {{ period }}</h3>
+  <h3 class="text-center">{{ league }} {{ season }} ({{ period }})</h3>
   <br>
   <h5 class="text-danger">Pick the winners of {{ num_picks }} games below and click Submit. </h5>
   <h5 class="text-danger">(You can change your picks, but your pick for any particular game must be finalized prior to game day.) </h5>
@@ -16,7 +16,7 @@
   <thead>
     <tr>
       <th scope="col">#</th>
-      <th scope="col">Date</th>
+      <th scope="col">Date-Time</th>
       <th scope="col"></th>
       <th scope="col">Visiting Team</th>
       <th scope="col">Moneyline</th>
@@ -32,7 +32,7 @@
   {% for game in games %}
     <tr>
       <th scope="row">{{ forloop.counter }}</th>
-      <td>{{ game.game_date|date:"SHORT_DATE_FORMAT" }}</td>
+      <td>{{ game.game_date|date:"SHORT_DATE_FORMAT" }}-{{ game.game_time|time:"G:i" }}</td>
       {% if compare_date < game.game_date or compare_date == game.game_date and compare_time < game.game_time %}
         {% if game.picked_away == True %}
           <td class="pl-5"><input type=checkbox name="picks" value="{{ game.team_away }}" checked></td>
