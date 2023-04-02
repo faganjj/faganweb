@@ -21,7 +21,6 @@ class Contest(models.Model):
 	season = models.CharField(max_length=10)
 	period = models.CharField(max_length=10)
 	num_picks = models.IntegerField()
-	num_games = models.IntegerField()
 	winner = models.CharField(max_length=20, blank=True)
 	status = models.CharField(max_length=10, choices=CONTEST_STATUS, default='Active')
 	test_contest = models.BooleanField(default=False)

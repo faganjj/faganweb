@@ -2,9 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.http import Http404
-from datetime import datetime, date
+from datetime import datetime, date, time
 from django.db.models import Sum
-import time
 
 from .models import Contest, Team, Game, Result, Pick, User
 # from .forms import PicksForm
@@ -61,7 +60,7 @@ def makepicks(request, league):
 	user = request.user
 	# Get all of the game records for the active contest ("game_set" uses
 	# one-to-many relationship to get the game records).
-	games = contest.game_set.all()
+	games = contest.game_set.all().order_by('game_date', 'game_time')
 	mypicks = []
 
 	# Check if the Submit button has been clicked.  If so, validate and
@@ -111,12 +110,16 @@ def makepicks(request, league):
 	# Get today's date.  It will be compared to each game date, to determine
 	# if the gsme can be legitimately picked.
 	compare_date = date.today()
-	compare_time = time.localtime()
+	compare_time = datetime.now().time()
 	# But if the contest record has been created for test purposes, set the 
 	# compare date to an arbitrary date in the past.
 	if contest.test_contest:
 		compare_date = date(2000,1,1)
 	for game in games:
+		if compare_date < game.game_date or (compare_date == game.game_date and compare_time < game.game_time):
+			game.eligible = True
+		else:
+			game.eligible = False
 		abbrev_away = game.team_away
 		if len(mypicks) > 0:
 			if abbrev_away in mypicks:
@@ -316,7 +319,7 @@ def tally(request):
 		contest = request.POST.get('contest')
 		# Get the contest record
 		contest = Contest.objects.get(id=contest)
-		# Get the initialized result record for each participant in the contrst.
+		# Get the initialized result record for each participant in the contest.
 		results = Result.objects.filter(contest=contest)
 		# Tally up the points, wins, losses, and ties for each participant, and
 		# update their result record accordingly.
@@ -327,7 +330,7 @@ def tally(request):
 			for pick in picks:
 				mypicks.append(pick.abbrev)
 			wins = losses = ties = points = 0
-			games = contest.game_set.all()
+			games = contest.game_set.all().order_by('game_date', 'game_time')
 			for game in games:
 				if game.team_away in mypicks:
 					if game.outcome_away == "W":
@@ -358,6 +361,9 @@ def tally(request):
 			result.ties = ties
 			result.points = points
 			result.save()
+		# Determine the winner of the contest
+		results = Result.objects.filter(contest=contest).order_by("-points")
+		contest.winner = results[0].participant.username
 		# Change the status of the contest to "Complete", and send a 
 		# messsage indicating success.
 		contest.status = "Complete"
