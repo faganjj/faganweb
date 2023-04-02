@@ -189,9 +189,9 @@ def results(request):
 		# picked_home = True
 		for game in games:
 			if game.team_away in mypicks or game.team_home in mypicks:
-				team_away = Team.objects.get(abbrev=game.team_away)
+				team_away = Team.objects.get(league=league, abbrev=game.team_away)
 				game.name_away = team_away.name
-				team_home = Team.objects.get(abbrev=game.team_home)
+				team_home = Team.objects.get(league=league, abbrev=game.team_home)
 				game.name_home = team_home.name
 				if game.team_away in mypicks:
 					game.picked_away = True
