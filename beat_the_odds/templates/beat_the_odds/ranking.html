@@ -2,6 +2,8 @@
 
 {% block page_header %}
 
+{% include 'beat_the_odds/includes/messages.html' %}
+
 <h2 class="text-center">Participant Ranking</h2>
 <br>
 <form action="{% url 'beat_the_odds:ranking' %}" method="post">
@@ -21,8 +23,6 @@
   <input class="btn btn-sm btn-primary" type="submit" value="Show Ranking" />
 </form>
 <br>
-
-{% include 'beat_the_odds/includes/messages.html' %}
 
 {% endblock page_header %} 
 

@@ -2,6 +2,8 @@
 
 {% block page_header %}
 
+{% include 'beat_the_odds/includes/messages.html' %}
+
 <h2 class="text-center">Results for {{ user.username }}</h2>
 <form action="{% url 'beat_the_odds:results' %}" method="post">
   {% csrf_token %}
@@ -14,8 +16,6 @@
   <input class="btn btn-sm btn-primary" type="submit" value="Show Results" />
 </form>
 <br>
-
-{% include 'beat_the_odds/includes/messages.html' %}
 
 {% endblock page_header %} 
 

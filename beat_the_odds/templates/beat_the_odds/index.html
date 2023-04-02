@@ -2,6 +2,8 @@
 
 {% block content %}
 
+{% include 'beat_the_odds/includes/messages.html' %}
+
   <div class="jumbotron pt-4 pb-4">
   	<h2 class="display-3 d-inline">Beat the Odds</h2>
 
@@ -92,11 +94,10 @@
 			  <option value="MLB">MLB</option>
 			</select>
 			-->
-			<br><br>
+			<br>
+			<br>
 			<input class="btn btn-lg btn-primary" type="submit" value="Make or Change Picks" />
 		</form>
 		<br>
-
-{% include 'beat_the_odds/includes/messages.html' %}
 
 {% endblock content %}
