@@ -61,6 +61,7 @@ def makepicks(request, league):
 	# Get all of the game records for the active contest ("game_set" uses
 	# one-to-many relationship to get the game records).
 	games = contest.game_set.all()
+	mypicks = []
 
 	# Check if the Submit button has been clicked.  If so, validate and
 	# save the picks.  If not, get the user's prior picks (if there are any)
@@ -96,7 +97,6 @@ def makepicks(request, league):
 			return redirect('beat_the_odds:index')
 	else:
 		picks = Pick.objects.filter(contest=contest, participant=user)
-		mypicks = []
 		for pick in picks:
 			mypicks.append(pick.abbrev)
 
@@ -117,13 +117,13 @@ def makepicks(request, league):
 		compare_date = date(2000,1,1)
 	for game in games:
 		abbrev_away = game.team_away
-		if len(picks) > 0:
+		if len(mypicks) > 0:
 			if abbrev_away in mypicks:
 				game.picked_away = True
 		team_away = Team.objects.get(league=league, abbrev=abbrev_away)
 		game.name_away = team_away.name
 		abbrev_home = game.team_home
-		if len(picks) > 0:
+		if len(mypicks) > 0:
 			if abbrev_home in mypicks:
 				game.picked_home = True
 		team_home = Team.objects.get(league=league, abbrev=abbrev_home)
