@@ -17,10 +17,6 @@ from .models import Contest, Team, Game, Result, Pick, User
 def index(request):
 	""" The home page for Beat the Odds """
 
-	logger.warning("This is a warning message.")
-	logger.error("This is an error message.")
-	logger.critical("This is a critical message.")
-
 	# Get the most recent Contest record.  (Sort contest records by
 	# contest.id.  Note:  The "-" indicates descending order.  The [0]
 	# indicates the first record in the resulting queryset, which will
