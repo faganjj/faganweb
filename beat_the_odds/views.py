@@ -4,6 +4,9 @@ from django.contrib import messages
 from django.http import Http404
 from datetime import datetime, date, time
 from django.db.models import Sum
+import logging
+
+logger = logging.getLogger("beat_the_odds.views")
 
 from .models import Contest, Team, Game, Result, Pick, User
 # from .forms import PicksForm
@@ -14,10 +17,15 @@ from .models import Contest, Team, Game, Result, Pick, User
 def index(request):
 	""" The home page for Beat the Odds """
 
+	logger.warning("This is a warning message.")
+	logger.error("This is an error message.")
+	logger.critical("This is a critical message.")
+
 	# Get the most recent Contest record.  (Sort contest records by
 	# contest.id.  Note:  The "-" indicates descending order.  The [0]
 	# indicates the first record in the resulting queryset, which will
 	# be the most recent).
+
 	try:
 		contest = Contest.objects.order_by('-id')[0]
 	except:
