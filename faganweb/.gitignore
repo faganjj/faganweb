@@ -1,7 +1,7 @@
-ll_env
+fagan_env/
 __pycache__/
 *.py[cod]
 .env
 *.sqlite3
-json
-sql
+json/
+sql/
