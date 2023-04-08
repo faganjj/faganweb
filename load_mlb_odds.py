@@ -111,13 +111,12 @@ if error_count > 0:
 	logger.error(message)
 	exit()
 
-if warning_count > 0:
+if warning_count > 0 and current_time < deadline:
 	message = "Warning - Odds missing for " + str(warning_count) + " game(s)."
 	logger.warning(message)
-
-if current_time < deadline:
 	message = "MLB odds process not completed"
-	logger.warning(mesage)
+	logger.warning(message)
+	exit()
 
 contests = Contest.objects.filter(league=league, status="Active")
 for c in contests:
