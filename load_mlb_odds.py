@@ -40,7 +40,7 @@ warning_count = 0
 game_count = 0
 for game in odds_data:
 	errors_found = False
-	warnings = False
+	warning = False
 	game_datetime_UTC = datetime.fromisoformat(game['commence_time'].replace('Z', '+00:00'))
 	game_datetime_ET = game_datetime_UTC.astimezone(ZoneInfo("America/New_York"))
 	game_date = game_datetime_ET.date()
