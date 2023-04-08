@@ -67,9 +67,14 @@ for game in odds_data:
 		logger.error(message)
 	else:
 		team_home = team.abbrev
+	print(game_date, compare_date)
 	if game['bookmakers']:
-		odds_away = game['bookmakers'][0]['markets'][0]['outcomes'][1]['price']
-		odds_home = game['bookmakers'][0]['markets'][0]['outcomes'][0]['price']
+		if game['bookmakers'][0]['markets'][0]['outcomes'][0]['name'] == name_away:
+			odds_away = game['bookmakers'][0]['markets'][0]['outcomes'][0]['price']
+			odds_home = game['bookmakers'][0]['markets'][0]['outcomes'][1]['price']
+		else:
+			odds_away = game['bookmakers'][0]['markets'][0]['outcomes'][1]['price']
+			odds_home = game['bookmakers'][0]['markets'][0]['outcomes'][0]['price']			
 	else:
 		odds_away = None
 		odds_home = None
