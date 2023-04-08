@@ -11,10 +11,10 @@ logger = logging.getLogger("beat_the_odds.views")
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'faganweb.settings')
 django.setup()
 
-from beat_the_odds.models import Team, Contest, Game
+from beat_the_odds.models import Team, Contest, Game, Pick, Result
 
 # Issue an API call to get the latest odds in JSON format
-url = 'https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=f13fe3a3f1ea67d9a1c15d549efc719e&bookmakers=fanduel&markets=h2h&oddsFormat=american'
+url = 'https://api.the-odds-api.com/v4/sports/baseball_mlb/scores/?apiKey=f13fe3a3f1ea67d9a1c15d549efc719e&daysFrom=1'
 r = requests.get(url)
 odds_data = r.json()
 
@@ -30,9 +30,11 @@ compare_date = current_date + timedelta(days = -1)
 
 # Process the data returned from the API call
 gamelist = []
-errors_found = False
 game_count = 0
+error_count = 0
+scores_missing = 0
 for game in odds_data:
+	errors_found = False
 	game_datetime_UTC = datetime.fromisoformat(game['commence_time'].replace('Z', '+00:00'))
 	game_datetime_ET = game_datetime_UTC.astimezone(ZoneInfo("America/New_York"))
 	game_date = game_datetime_ET.date()
@@ -44,6 +46,7 @@ for game in odds_data:
 		team = Team.objects.get(name=name_away)
 	except:
 		errors_found = True
+		error_count += 1
 		message = "No match found for team name " + name_away
 		logger.error(message)
 	else:
@@ -53,15 +56,31 @@ for game in odds_data:
 		team = Team.objects.get(name=name_home)
 	except:
 		errors_found = True
+		error_count += 1
 		message = "No match found for team name " + name_home
 		logger.error(message)
 	else:
 		team_home = team.abbrev
-	score_away = game['bookmakers'][0]['markets'][0]['outcomes'][1]['score']
-	score_home = game['bookmakers'][0]['markets'][0]['outcomes'][0]['score']
-	if score_away == None or score_home == None:
-		errors_found = True
-		message = "Scores not yet posted for " + team_away + " vs " + team_home
+	if game['scores']:
+		score_away = game['scores'][1]['score']
+		score_home = game['scores'][0]['score']
+		if score_away < score_home:
+			outcome_away = 'L'
+			outcome_home = 'W'
+		elif score_away > score_home:
+			outcome_away = "W"
+			outcome_home = "L"
+		else:
+			outcome_away = "T"
+			outcome_home = "T"
+	else:
+		score_away = 0
+		score_home = 0
+		outcome_away = "T"
+		outcome_home = "T"
+		scores_missing += 1
+		message = "Scores missing for " + team_away + " vs " + team_home + ". Rainout?"
+		logger.warning(message)
 
 	if errors_found == True:
 		continue
@@ -74,27 +93,26 @@ for game in odds_data:
 	gamedict['team_home'] = team_home
 	gamedict['score_away'] = score_away
 	gamedict['score_home'] = score_home
+	gamedict['outcome_away'] = outcome_away
+	gamedict['outcome_home'] = outcome_home
 	gamelist.append(gamedict)
 
-if game_count < 10:
-	errors_found =True
-	message = "Need 10 or more games. Only " + game_count + " were found."
+if game_count == 0:
+	error_count += 1
+	message = "No game records found."
 	logger.error(message)
 
 league = "MLB"
 season = compare_date.strftime("%Y")
 period = compare_date.strftime("%b %-d")
-contest = Contest.objects.filter(league=league, season=season, period=period)
-if len(contest) == 0:
-	errors_found = True
+try:
+	contest = Contest.objects.get(league=league, season=season, period=period)
+except:
+	error_count += 1
 	message = "Contest record not found for " + league + "-" + season + "-" + period
 	logger.error(message)
-elif len(contest) > 1:
-	errors_found = True
-	message = "Multiple contest records for " + league + "-" + season + "-" + period
-	logger.error(message)	
 
-if errors_found == True:
+if error_count > 0:
 	message = "MLB scores process failed to complete"
 	logger.warning(message)
 	exit()
@@ -110,9 +128,12 @@ for game in gamelist:
 		g = Game.objects.get(contest=contest, team_away=team_away, team_home=team_home)
 	except:
 		message = "Game record not found for " + team_away + " vs " + team_home
-		logger.error(message)
+		logger.warning(message)
+		continue
 	g.score_away = score_away
 	g.score_home = score_home
+	g.outcome_away = outcome_away
+	g.outcome_home = outcome_home
 	g.save()
 
 results = Result.objects.filter(contest=contest)

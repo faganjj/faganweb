@@ -14,7 +14,7 @@ django.setup()
 from beat_the_odds.models import Team, Contest, Game
 
 # Issue an API call to get the latest odds in JSON format
-url = 'https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=f13fe3a3f1ea67d9a1c15d549efc719e&bookmakers=fanduel&markets=h2h&oddsFormat=american'
+url = 'https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=f13fe3a3f1ea67d9a1c15d549efc719e&bookmakers=pointsbetus&markets=h2h&oddsFormat=american'
 r = requests.get(url)
 odds_data = r.json()
 
@@ -23,17 +23,24 @@ odds_data = r.json()
 # with open(filename) as f:
 # 	odds_data = json.load(f)
 
-# Get today's date
+# Get today's date and time
 current_date = datetime.now().date()
+current_time = datetime.now().time()
+
+deadline = time(22, 0, 0)
+
 # Determine tomorrow's date (which will be the contest date)
 # compare_date = current_date
 compare_date = current_date + timedelta(days = 1)
 
 # Process the data returned from the API call
 gamelist = []
-errors_found = False
+error_count = 0
+warning_count = 0
 game_count = 0
 for game in odds_data:
+	errors_found = False
+	warnings = False
 	game_datetime_UTC = datetime.fromisoformat(game['commence_time'].replace('Z', '+00:00'))
 	game_datetime_ET = game_datetime_UTC.astimezone(ZoneInfo("America/New_York"))
 	game_date = game_datetime_ET.date()
@@ -44,6 +51,7 @@ for game in odds_data:
 	try:
 		team = Team.objects.get(name=name_away)
 	except:
+		error_count += 1
 		errors_found = True
 		message = "No match found for team name " + name_away
 		logger.error(message)
@@ -53,18 +61,25 @@ for game in odds_data:
 	try:
 		team = Team.objects.get(name=name_home)
 	except:
+		error_count += 1
 		errors_found = True
 		message = "No match found for team name " + name_home
 		logger.error(message)
 	else:
 		team_home = team.abbrev
-	odds_away = game['bookmakers'][0]['markets'][0]['outcomes'][1]['price']
-	odds_home = game['bookmakers'][0]['markets'][0]['outcomes'][0]['price']
+	if game['bookmakers']:
+		odds_away = game['bookmakers'][0]['markets'][0]['outcomes'][1]['price']
+		odds_home = game['bookmakers'][0]['markets'][0]['outcomes'][0]['price']
+	else:
+		odds_away = None
+		odds_home = None
 	if odds_away == None or odds_home == None:
-		errors_found = True
+		warning = True
+		warning_count += 1
 		message = "Odds not yet posted for " + team_away + " vs " + team_home
+		logger.warning(message)
 
-	if errors_found == True:
+	if errors_found == True or warning == True:
 		continue
 
 	game_count += 1
@@ -78,8 +93,8 @@ for game in odds_data:
 	gamelist.append(gamedict)
 
 if game_count < 10:
-	errors_found =True
-	message = "Need 10 or more games. Only " + game_count + " were found."
+	error_count += 1
+	message = "Need 10 or more games. Only " + str(game_count) + " were found."
 	logger.error(message)
 
 league = "MLB"
@@ -87,14 +102,28 @@ season = compare_date.strftime("%Y")
 period = compare_date.strftime("%b %-d")
 contest = Contest.objects.filter(league=league, season=season, period=period)
 if len(contest) > 0:
-	errors_found = True
+	error_count +=1
 	message = "A contest record already exists for " + league + "-" + season + "-" + period
 	logger.error(message)
 
-if errors_found == True:
-	message = "MLB odds process failed to complete"
-	logger.warning(message)
+if error_count > 0:
+	message = "Errors found - MLB odds process failed to complete"
+	logger.error(message)
 	exit()
+
+if warning_count > 0:
+	message = "Warning - Odds missing for " + str(warning_count) + " game(s)."
+	logger.warning(message)
+
+if current_time < deadline:
+	message = "MLB odds process not completed"
+	logger.warning(mesage)
+
+contests = Contest.objects.filter(league=league, status="Active")
+for c in contests:
+	c.status="Closed"
+	c.save()
+
 
 c = Contest(league= league, season=season, period=period, num_picks=5, status="Active")
 c.save()
@@ -110,8 +139,7 @@ for game in gamelist:
 		odds_away=odds_away, odds_home=odds_home)
 	g.save()
 
-
-logger.warning("MLB odds process completed successfully")
+logger.warning("MLB odds process completed successfully for" + str(game_count) + " games.")
 
 
 
