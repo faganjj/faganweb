@@ -208,12 +208,12 @@ def results(request):
 					else:
 						game.points_away = round(-100 / (game.odds_away/100))
 					if game.outcome_away == "W":
-						game.mypoints_away = game.points_away
+						game.mypoints = game.points_away
 					elif game.outcome_away == "L":
-						game.mypoints_away = -100
+						game.mypoints = -100
 					elif game.outcome_away == "T":
-						game.mypoints_away = 0
-					mytotal += game.mypoints_away
+						game.mypoints = 0
+					mytotal += game.mypoints
 				if game.team_home in mypicks:
 					game.picked_home = True
 					if game.odds_home > 0:
@@ -221,12 +221,12 @@ def results(request):
 					else:
 						game.points_home = round(-100 / (game.odds_home/100))	
 					if game.outcome_home == "W":
-						game.mypoints_home = game.points_home
+						game.mypoints = game.points_home
 					elif game.outcome_home == "L":
-						game.mypoints_home = -100
+						game.mypoints = -100
 					elif game.outcome_home == "T":
-						game.mypoints_home = 0
-					mytotal += game.mypoints_home
+						game.mypoints = 0
+					mytotal += game.mypoints
 		context = {'league': league, 'season': season, 'period': period, 'games': games, 'mytotal': mytotal}
 	return render(request, 'beat_the_odds/results.html', context)
 
