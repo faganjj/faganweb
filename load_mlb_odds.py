@@ -25,7 +25,7 @@ from beat_the_odds.models import Team, Contest, Game
 
 # Issue an API call to get the latest odds in JSON format.  the-odds-api.com is being used as the data source.
 SPORT = "baseball_mlb"
-BOOKMAKER = "pointsbetus"
+BOOKMAKER = "fanduel"
 API_KEY = "f13fe3a3f1ea67d9a1c15d549efc719e"
 url = 'https://api.the-odds-api.com/v4/sports/'+ SPORT + '/odds/?apiKey=' + API_KEY + '&bookmakers=' + BOOKMAKER + '&markets=h2h&oddsFormat=american'
 r = requests.get(url)
