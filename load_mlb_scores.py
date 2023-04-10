@@ -73,7 +73,7 @@ for game in odds_data:
 
 	# Use the "scores" key in the API data to get the scores for the away and home teams.
 	if game['scores']:
-		if game['scores'][0]['name'] = name_away:
+		if game['scores'][0]['name'] == name_away:
 			score_away = game['scores'][0]['score']
 			score_home = game['scores'][1]['score']
 		else:
