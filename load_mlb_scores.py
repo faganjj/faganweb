@@ -90,18 +90,6 @@ for game in odds_data:
 		else:
 			outcome_away = "T"
 			outcome_home = "T"
-		message = "name_away = " + name_away
-		logger.warning(message) 
-		message = "name_home = " + name_home
-		logger.warning(message) 
-		message = "score_away = " + str(score_away)
-		logger.warning(message) 
-		message = "score_home = " + str(score_home)
-		logger.warning(message) 
-		message = "outcome_away = " + outcome_away
-		logger.warning(message) 
-		message = "outcome_home = " + outcome_home
-		logger.warning(message) 
 	else:
 		# If no scores were found for this game, treat is as a 0-0 tie, and log a warning
 		# message to the console.
@@ -158,6 +146,8 @@ for game in gamelist:
 	team_home = game['team_home']
 	score_away = game['score_away']
 	score_home = game['score_home']
+	outcome_away = game['outcome_away']
+	outcome_home = game['outcome_home']
 	try:
 		g = Game.objects.get(contest=contest, team_away=team_away, team_home=team_home)
 	except:
