@@ -79,7 +79,8 @@ for game in odds_data:
 		else:
 			score_away = int(game['scores'][1]['score'])
 			score_home = int(game['scores'][0]['score'])
-		# Based on the scores, determine the outcome for each time (Win, Lose, or Tie)	
+
+		# Based on the scores, determine the outcome for each game (Win, Lose, or Tie)	
 		if score_away < score_home:
 			outcome_away = 'L'
 			outcome_home = 'W'
@@ -89,6 +90,18 @@ for game in odds_data:
 		else:
 			outcome_away = "T"
 			outcome_home = "T"
+		message = "name_away = " + name_away
+		logger.warning(message) 
+		message = "name_home = " + name_home
+		logger.warning(message) 
+		message = "score_away = " + str(score_away)
+		logger.warning(message) 
+		message = "score_home = " + str(score_home)
+		logger.warning(message) 
+		message = "outcome_away = " + outcome_away
+		logger.warning(message) 
+		message = "outcome_home = " + outcome_home
+		logger.warning(message) 
 	else:
 		# If no scores were found for this game, treat is as a 0-0 tie, and log a warning
 		# message to the console.
