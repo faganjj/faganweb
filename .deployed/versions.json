@@ -1,0 +1,31 @@
+[
+  {
+    "apihost": "https://faas-nyc1-2ef2e6cc.doserverless.co",
+    "namespace": "fn-3a43493e-5807-4df6-912a-cbcfb13c2e04",
+    "packageVersions": {
+      "sample": {
+        "version": "0.0.5",
+        "digest": "e4a2720e87c619a56019f373ead5690d39813e0a319af5e91ec0aa0fc3604409"
+      },
+      "scripts": {
+        "version": "0.0.2",
+        "digest": "21bcb0d408fe8067b3e2346f57dca9862a2b1a9dd1795d87b6871f32ce0f8ae8"
+      }
+    },
+    "actionVersions": {
+      "sample/hello": {
+        "version": "0.0.5",
+        "digest": "06130d0349b94c1d963a119383a12cae896e40b16ba28f7ccbd96c59a4e80f12"
+      },
+      "scripts/load_mlb_odds": {
+        "version": "0.0.2",
+        "digest": "758df48328677b444d2deea34f2779cafc9e348747af4ea88d284eb1db7547e0"
+      },
+      "scripts/load_mlb_scores": {
+        "version": "0.0.3",
+        "digest": "bba0a4161a34c648a4cf87f3d991cf3a204d3d4482f9e713e84b77730a233bf0"
+      }
+    },
+    "webHashes": {}
+  }
+]

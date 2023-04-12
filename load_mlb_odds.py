@@ -6,6 +6,8 @@ import json
 from datetime import datetime, date, time, timedelta
 from zoneinfo import ZoneInfo
 
+def main():
+
 # The following statement allows messages to be logged to the console
 # Here's a link to an article that provides more info:
 # https://medium.com/@torkashvand/a-comprehensive-guide-to-logging-in-django-e041f311bcb7
@@ -204,7 +206,7 @@ for game in gamelist:
 	g.save()
 
 # Log a message that the process has completed successfully.
-logger.warning("MLB odds process completed successfully for" + str(game_count) + " games.")
+logger.warning("MLB odds process completed successfully for " + str(game_count) + " games.")
 
 
 

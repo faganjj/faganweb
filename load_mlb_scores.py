@@ -165,6 +165,11 @@ for game in gamelist:
 # Tally up the points, wins, losses, and ties for each participant, and
 # update their result record accordingly.
 results = Result.objects.filter(contest=contest)
+if len(result) == 0:
+	message = "There were no picks for the " + period + " contest."
+	logger.warning (message)
+	logger.warning("MLB scores process completed successfully")
+	exit()
 
 for result in results:
 	participant = result.participant
