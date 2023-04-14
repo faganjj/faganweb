@@ -6,7 +6,6 @@ import json
 from datetime import datetime, date, time, timedelta
 from zoneinfo import ZoneInfo
 
-def main():
 
 # The following statement allows messages to be logged to the console
 # Here's a link to an article that provides more info:
