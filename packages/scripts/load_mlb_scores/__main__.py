@@ -11,14 +11,14 @@ def main():
 	# Most of the code in this script is very similar to the code in load_mlb_odds, so 
 	# the comments in this script pertain to the things that are dfferent.
 
-	logger = logging.getLogger("beat_the_odds.views")
-
 	os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'faganweb.settings')
 	django.setup()
 
+	logger = logging.getLogger("beat_the_odds.views")
+
 	from beat_the_odds.models import Team, Contest, Game, Pick, Result
 
-	# Issue an API call to get the latest odds in JSON format
+	#Issue an API call to get the latest odds in JSON format
 	SPORT = "baseball_mlb"
 	API_KEY = "f13fe3a3f1ea67d9a1c15d549efc719e"
 	url = 'https://api.the-odds-api.com/v4/sports/' + SPORT + '/scores/?apiKey=' + API_KEY + '&daysFrom=1'
@@ -164,6 +164,11 @@ def main():
 	# Tally up the points, wins, losses, and ties for each participant, and
 	# update their result record accordingly.
 	results = Result.objects.filter(contest=contest)
+	if len(results) == 0:
+		message = "There were no picks for the " + period + " contest."
+		logger.warning (message)
+		logger.warning("MLB scores process completed successfully")
+		exit()
 
 	for result in results:
 		participant = result.participant

@@ -43,3 +43,13 @@ packages:
           environment: {}
           annotations: {}
           limits: {}
+        - name: django_test
+          binary: false
+          main: ""
+          runtime: python:default
+          web: true
+          websecure: false
+          parameters: {}
+          environment: {}
+          annotations: {}
+          limits: {}

@@ -6,12 +6,7 @@ import json
 from datetime import datetime, date, time, timedelta
 from zoneinfo import ZoneInfo
 
-def main():
-
-	# The following statement allows messages to be logged to the console
-	# Here's a link to an article that provides more info:
-	# https://medium.com/@torkashvand/a-comprehensive-guide-to-logging-in-django-e041f311bcb7
-	logger = logging.getLogger("beat_the_odds.views")
+def main(args):
 
 	# The following statements allow the django ORM to be used in scripts.  It accesses the settings.py file for faganweb.
 	# Here's a link to a video that explains it:
@@ -20,6 +15,11 @@ def main():
 	#	&aqs=chrome..69i57j0i390i650l4j69i60.33598j1j7&sourceid=chrome&ie=UTF-8#fpstate=ive&vld=cid:0c8bffb5,vid:AS01VoC9l5w
 	os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'faganweb.settings')
 	django.setup()
+
+	# The following statement allows messages to be logged to the console
+	# Here's a link to an article that provides more info:
+	# https://medium.com/@torkashvand/a-comprehensive-guide-to-logging-in-django-e041f311bcb7
+	logger = logging.getLogger("beat_the_odds.views")
 
 	# Import the Django ORM models (tables) needed for this script.
 
