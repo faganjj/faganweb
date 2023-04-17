@@ -4,30 +4,30 @@
     "namespace": "fn-3a43493e-5807-4df6-912a-cbcfb13c2e04",
     "packageVersions": {
       "sample": {
-        "version": "0.0.23",
+        "version": "0.0.68",
         "digest": "e4a2720e87c619a56019f373ead5690d39813e0a319af5e91ec0aa0fc3604409"
       },
       "scripts": {
-        "version": "0.0.20",
+        "version": "0.0.65",
         "digest": "0e4331940cf903c84a4921dbf7529c9e16875014de5d3986b13ecee039be3e11"
       }
     },
     "actionVersions": {
       "sample/hello": {
-        "version": "0.0.23",
+        "version": "0.0.68",
         "digest": "06130d0349b94c1d963a119383a12cae896e40b16ba28f7ccbd96c59a4e80f12"
       },
       "scripts/django_test": {
-        "version": "0.0.6",
-        "digest": "4a6577fddc1935d98be9b9006714bee95ee1b4a3fc729ddd3e2eb369396f5e49"
+        "version": "0.0.48",
+        "digest": "f9fab34c9f4a6ae10ff02865ab2d0e63bd7000dbc73ca23f1f186767e16bb6d5"
       },
       "scripts/load_mlb_odds": {
-        "version": "0.0.14",
-        "digest": "86673a1fde0a7d4384eb626e2238a11230bbf3557da9beaab3abc9a0816a30b7"
+        "version": "0.0.58",
+        "digest": "b3f6d89fa4b306448e80e57f1a4a15a73c482dcadaee1d55f1ee82a1b2692725"
       },
       "scripts/load_mlb_scores": {
-        "version": "0.0.17",
-        "digest": "bd2e5aa642ec4c1db6f2450dc0e587da592b078a958e3ca77b31356bff54f9f8"
+        "version": "0.0.61",
+        "digest": "0f15ef47db7fdd2378976da2870e5ce2c567a030e9f7da96a25f1608bb9e40bc"
       }
     },
     "webHashes": {}
