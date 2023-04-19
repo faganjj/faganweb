@@ -1,6 +1,7 @@
 
+###  LOAD_MLB_ODDS  ###
+
 import os
-import sys
 import django
 
 # The following statements allow the django ORM to be used in scripts.  It accesses the settings.py file for faganweb.
@@ -8,8 +9,8 @@ import django
 # https://www.google.com/search?
 #	q=use+django+orm+in+python+script&rlz=1C5CHFA_enUS897US897&oq=use+django+orm+in+python+script
 #	&aqs=chrome..69i57j0i390i650l4j69i60.33598j1j7&sourceid=chrome&ie=UTF-8#fpstate=ive&vld=cid:0c8bffb5,vid:AS01VoC9l5w
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'faganweb.settings')
-django.setup()
+#os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'faganweb.settings')
+#django.setup()
 
 import logging
 logger = logging.getLogger("faganweb scripts")
@@ -19,14 +20,7 @@ import json
 from datetime import datetime, date, time, timedelta
 from zoneinfo import ZoneInfo
 from django.db.models import Sum
-
-from apscheduler.schedulers.blocking import BlockingScheduler
-from apscheduler.triggers.cron import CronTrigger
-from django.core.management.base import BaseCommand
-from django_apscheduler.jobstores import DjangoJobStore
 from django_apscheduler.models import DjangoJobExecution
-from django_apscheduler import util
-
 
 from django.conf import settings
 
@@ -64,8 +58,8 @@ def load_mlb_odds():
 
 	# Create an empty list which will be used to contain data for all valid games for the contest date.
 	gamelist = []
-	# Use error_count and warning_count to keep track of errors/warnings found during data validation.
-	error_count = 0
+	# Use error_found and warning_count to keep track of errors/warnings found during data validation.
+	error_found = False
 	warning_count = 0
 	# Use game_count to keep track of the number of games to be loaded for the upcoming contest
 	game_count = 0
@@ -73,9 +67,9 @@ def load_mlb_odds():
 	# Loop through the game data returned by the API call.  It's in the form of a list of dictionaries, with a
 	# separate dictionary for each game.
 	for game in odds_data:
-		# Use error-found and warning_found if an error or warning is found for a particular game.
-		error_found = False
-		warning_found = False
+		# Use game_error-found and game_warning_found if an error or warning is found for a particular game.
+		game_error_found = False
+		game_warning_found = False
 		# Process the date and time when the game is scheduled to begin.  In the API data, they are represented
 		# as a string in UTC-Z format (<date>T<time>Z). The Python datetime module doesn't handle this type of
 		# format directly, so some manipulation is required to change the "Z" to "+00:00"
@@ -96,8 +90,8 @@ def load_mlb_odds():
 		try:
 			team = Team.objects.get(name=name_away)
 		except:
-			error_count += 1
 			error_found = True
+			game_error_found = True
 			message = "No match found for team name " + name_away
 			logger.error(message)
 		else:
@@ -109,8 +103,8 @@ def load_mlb_odds():
 		try:
 			team = Team.objects.get(name=name_home)
 		except:
-			error_count += 1
 			error_found = True
+			game_error_found = True
 			message = "No match found for team name " + name_home
 			logger.error(message)
 		else:
@@ -133,13 +127,13 @@ def load_mlb_odds():
 		# If the odds data for a particular game is missing, set the warning-found flag and post a message
 		# to the console.
 		if odds_away == None or odds_home == None:
-			warning_found = True
+			game_warning_found = True
 			warning_count += 1
 			message = "Odds not yet posted for " + team_away + " vs " + team_home
 			logger.warning(message)
 
 		# If an error or warning was dound during validation, skip this game and proceed to the next.
-		if error_found == True or warning_found == True:
+		if game_error_found == True or game_warning_found == True:
 			continue
 
 		# Increment game_count
@@ -156,14 +150,14 @@ def load_mlb_odds():
 		# Add this game to the "gamelist" list.
 		gamelist.append(gamedict)
 
-	# If less than 10 valid games were found, log an error message and increment error_count.
+	# If less than 10 valid games were found, log an error message and set error_found to True.
 	if game_count < 10:
-		error_count += 1
+		error_found = True
 		message = "Need 10 or more games. " + str(game_count) + " were found."
 		logger.error(message)
 
 	# Check if a Contest record already exists for the upcoming period (tomorrow for MLB, 
-	# the upcoming weekend for NFL).  If so, log an error message and increment error_count.
+	# the upcoming weekend for NFL).  If so, log an error message and set error_found to True.
 	league = "MLB"
 	# The "season" format is a 4-digit year
 	season = compare_date.strftime("%Y")
@@ -171,50 +165,53 @@ def load_mlb_odds():
 	period = compare_date.strftime("%b %-d")
 	contest = Contest.objects.filter(league=league, season=season, period=period)
 	if len(contest) > 0:
-		error_count +=1
+		error_found = True
 		message = "A contest record already exists for " + league + "-" + season + "-" + period
 		logger.error(message)
 
 	# If any errors were found during validation, log an error message and terminate the process.
-	if error_count > 0:
+	if error_found == True:
 		message = "Errors found - MLB odds process failed to complete"
 		logger.error(message)
-		sys.exit()
-
+	else:
 	# If odds were missing for any games and the time deadline has been reached, log a warning message
 	# and terminate the process.
-	if warning_count > 0 and current_time < deadline:
-		message = "Warning - Odds missing for " + str(warning_count) + " game(s)."
-		logger.warning(message)
-		message = "MLB odds process not completed"
-		logger.warning(message)
-		sys.exit()
+		if warning_found == True and current_time < deadline:
+			message = "Warning - Odds missing for " + str(warning_count) + " game(s)."
+			logger.warning(message)
+			message = "MLB odds process not completed"
+			logger.warning(message)
+		else:
+			# If an active Contest record exists, change its status field to "Closed" 
+			contests = Contest.objects.filter(league=league, status="Active")
+			for c in contests:
+				c.status="Closed"
+				c.save()
 
-	# If an active Contest record exists, change its status field to "Closed" 
-	contests = Contest.objects.filter(league=league, status="Active")
-	for c in contests:
-		c.status="Closed"
-		c.save()
+			# Create a new Contest record for the upcoming contest.
+			c = Contest(league= league, season=season, period=period, num_picks=5, status="Active")
+			c.save()
 
-	# Create a new Contest record for the upcoming contest.
-	c = Contest(league= league, season=season, period=period, num_picks=5, status="Active")
-	c.save()
+			# For each game in gamelist, create a new Game record, associate it with the Contest record (via the
+			# foreigb key field), and populate it with the game date, game time, team names, and Moneyline odds. 
+			for game in gamelist:
+				game_date = game['game_date']
+				game_time = game['game_time']
+				team_away = game['team_away']
+				team_home = game['team_home']
+				odds_away = game['odds_away']
+				odds_home = game['odds_home']
+				g = Game(contest=c, game_date=game_date, game_time=game_time, team_away=team_away, team_home=team_home, \
+					odds_away=odds_away, odds_home=odds_home)
+				g.save()
 
-	# For each game in gamelist, create a new Game record, associate it with the Contest record (via the
-	# foreigb key field), and populate it with the game date, game time, team names, and Moneyline odds. 
-	for game in gamelist:
-		game_date = game['game_date']
-		game_time = game['game_time']
-		team_away = game['team_away']
-		team_home = game['team_home']
-		odds_away = game['odds_away']
-		odds_home = game['odds_home']
-		g = Game(contest=c, game_date=game_date, game_time=game_time, team_away=team_away, team_home=team_home, \
-			odds_away=odds_away, odds_home=odds_home)
-		g.save()
+			# Log a message that the process has completed successfully.
+			logger.info("MLB odds process completed successfully for " + str(game_count) + " games.")
 
-	# Log a message that the process has completed successfully.
-	logger.warning("MLB odds process completed successfully for " + str(game_count) + " games.")
+
+
+###  LOAD_MLB_SCORES  ###
+
 
 
 def load_mlb_scores():
@@ -238,12 +235,12 @@ def load_mlb_scores():
 	# Process the data returned from the API call
 	gamelist = []
 	game_count = 0
-	error_count = 0
+	error_found = False
 	# Use the scores-missing variable to keep track of games for which scores have not been posted,
 	# likely because the game was rained-out, or suspended for some other reason.
 	scores_missing = 0
 	for game in odds_data:
-		error_found = False
+		game_error_found = False
 
 		game_datetime_UTC = datetime.fromisoformat(game['commence_time'].replace('Z', '+00:00'))
 		game_datetime_ET = game_datetime_UTC.astimezone(ZoneInfo("America/New_York"))
@@ -256,8 +253,8 @@ def load_mlb_scores():
 		try:
 			team = Team.objects.get(name=name_away)
 		except:
+			gme_error_found = True
 			error_found = True
-			error_count += 1
 			message = "No match found for team name " + name_away
 			logger.error(message)
 		else:
@@ -266,8 +263,8 @@ def load_mlb_scores():
 		try:
 			team = Team.objects.get(name=name_home)
 		except:
+			game_error_found = True
 			error_found = True
-			error_count += 1
 			message = "No match found for team name " + name_home
 			logger.error(message)
 		else:
@@ -303,7 +300,7 @@ def load_mlb_scores():
 			message = "Scores missing for " + team_away + " vs " + team_home + ". Rainout?"
 			logger.warning(message)
 
-		if error_found == True:
+		if game_error_found == True:
 			continue
 
 		game_count += 1
@@ -319,7 +316,7 @@ def load_mlb_scores():
 		gamelist.append(gamedict)
 
 	if game_count == 0:
-		error_count += 1
+		error_found == True
 		message = "No game records found."
 		logger.error(message)
 
@@ -332,100 +329,103 @@ def load_mlb_scores():
 	try:
 		contest = Contest.objects.get(league=league, season=season, period=period)
 	except:
-		error_count += 1
+		error_found = True
 		message = "Contest record not found for " + league + "-" + season + "-" + period
 		logger.error(message)
 
-	if error_count > 0:
+	if error_found == True:
 		message = "MLB scores process failed to complete"
 		logger.warning(message)
-		sys.exit()
+	else:
+		# For each game in gamelist, update the corresonding Game record, populating it with the scores
+		# and outcomes. 
+		for game in gamelist:
+			team_away = game['team_away']
+			team_home = game['team_home']
+			score_away = game['score_away']
+			score_home = game['score_home']
+			outcome_away = game['outcome_away']
+			outcome_home = game['outcome_home']
+			try:
+				g = Game.objects.get(contest=contest, team_away=team_away, team_home=team_home)
+			except:
+				# If the game record does not exist, log a warning message.  This is likely because odds
+				# for this game had not been posted in time, so it was not included in the contest.
+				message = "Game record not found for " + team_away + " vs " + team_home
+				logger.warning(message)
+				continue
+			g.score_away = score_away
+			g.score_home = score_home
+			g.outcome_away = outcome_away
+			g.outcome_home = outcome_home
+			g.save()
 
-	# For each game in gamelist, update the corresonding Game record, populating it with the scores
-	# and outcomes. 
-	for game in gamelist:
-		team_away = game['team_away']
-		team_home = game['team_home']
-		score_away = game['score_away']
-		score_home = game['score_home']
-		outcome_away = game['outcome_away']
-		outcome_home = game['outcome_home']
-		try:
-			g = Game.objects.get(contest=contest, team_away=team_away, team_home=team_home)
-		except:
-			# If the game record does not exist, log a warning message.  This is likely because odds
-			# for this game had not been posted in time, so it was not included in the contest.
-			message = "Game record not found for " + team_away + " vs " + team_home
-			logger.warning(message)
-			continue
-		g.score_away = score_away
-		g.score_home = score_home
-		g.outcome_away = outcome_away
-		g.outcome_home = outcome_home
-		g.save()
+		# Tally up the points, wins, losses, and ties for each participant, and
+		# update their result record accordingly.
+		results = Result.objects.filter(contest=contest)
+		if len(results) == 0:
+			message = "There were no picks for the " + period + " contest."
+			logger.warning (message)
+			logger.info("MLB scores process completed successfully")
+		else:
+			for result in results:
+				participant = result.participant
+				picks = Pick.objects.filter(contest=contest, participant=participant)
+				mypicks = []
+				for pick in picks:
+					mypicks.append(pick.abbrev)
+				wins = losses = ties = points = 0
+				games = contest.game_set.all().order_by('game_date', 'game_time')
+				for game in games:
+					if game.team_away in mypicks:
+						if game.outcome_away == "W":
+							wins += 1
+							if game.odds_away > 0:
+								points += game.odds_away
+							else:
+								points += round(-100 / (game.odds_away/100))
+						if game.outcome_away == "L":
+							losses += 1
+							points -= 100
+						if game.outcome_away == "T":
+							ties += 1
+					if game.team_home in mypicks:
+						if game.outcome_home == "W":
+							wins += 1
+							if game.odds_home > 0:
+								points += game.odds_home
+							else:
+								points += round(-100 / (game.odds_home/100))
+						if game.outcome_home == "L":
+							losses += 1
+							points -= 100
+						if game.outcome_home == "T":
+							ties += 1
+				result.wins = wins
+				result.losses = losses
+				result.ties = ties
+				result.points = points
+				result.save()
+			# Determine the winner of the contest and update the winner field in the Contest record.
+			results = Result.objects.filter(contest=contest).order_by("-points")
+			contest.winner = results[0].participant.username
+			# Change the status of the contest to "Complete", and send a 
+			# messsage indicating success.
+			contest.status = "Complete"
+			contest.save()
 
-	# Tally up the points, wins, losses, and ties for each participant, and
-	# update their result record accordingly.
-	results = Result.objects.filter(contest=contest)
-	if len(results) == 0:
-		message = "There were no picks for the " + period + " contest."
-		logger.warning (message)
-		logger.warning("MLB scores process completed successfully")
-		sys.exit()
+			logger.info("MLB scores process completed successfully")
 
-	for result in results:
-		participant = result.participant
-		picks = Pick.objects.filter(contest=contest, participant=participant)
-		mypicks = []
-		for pick in picks:
-			mypicks.append(pick.abbrev)
-		wins = losses = ties = points = 0
-		games = contest.game_set.all().order_by('game_date', 'game_time')
-		for game in games:
-			if game.team_away in mypicks:
-				if game.outcome_away == "W":
-					wins += 1
-					if game.odds_away > 0:
-						points += game.odds_away
-					else:
-						points += round(-100 / (game.odds_away/100))
-				if game.outcome_away == "L":
-					losses += 1
-					points -= 100
-				if game.outcome_away == "T":
-					ties += 1
-			if game.team_home in mypicks:
-				if game.outcome_home == "W":
-					wins += 1
-					if game.odds_home > 0:
-						points += game.odds_home
-					else:
-						points += round(-100 / (game.odds_home/100))
-				if game.outcome_home == "L":
-					losses += 1
-					points -= 100
-				if game.outcome_home == "T":
-					ties += 1
-		result.wins = wins
-		result.losses = losses
-		result.ties = ties
-		result.points = points
-		result.save()
-	# Determine the winner of the contest and update the winner field in the Contest record.
-	results = Result.objects.filter(contest=contest).order_by("-points")
-	contest.winner = results[0].participant.username
-	# Change the status of the contest to "Complete", and send a 
-	# messsage indicating success.
-	contest.status = "Complete"
-	contest.save()
 
-	logger.warning("MLB scores process completed successfully")
+
+###  DELETE_OLD_JOB_EXECUTIONS  ###
+
 
 
 # The `close_old_connections` decorator ensures that database connections, that have become
 # unusable or are obsolete, are closed before and after your job has run. You should use it
 # to wrap any jobs that you schedule that access the Django database in any way. 
-@util.close_old_connections
+# @util.close_old_connections
 def delete_old_job_executions(max_age=604_800):
   """
   This job deletes APScheduler job execution entries older than `max_age` from the database.
@@ -437,49 +437,3 @@ def delete_old_job_executions(max_age=604_800):
   """
   DjangoJobExecution.objects.delete_old_job_executions(max_age)
 
-
-# class Command(BaseCommand):
-#   help = "Runs APScheduler."
-
-# 	def handle(self, *args, **options):
-scheduler = BlockingScheduler(timezone=settings.TIME_ZONE)
-scheduler.add_jobstore(DjangoJobStore(), "default")
-
-scheduler.add_job(
-  load_mlb_odds,
-  trigger=CronTrigger(hour="20-22", minute=10),  
-  id="load_mlb_odds",  # The `id` assigned to each job MUST be unique
-  max_instances=1,
-  replace_existing=True,
-)
-logger.warning("Added job 'load_mlb_odds'.")
-
-scheduler.add_job(
-  load_mlb_scores,
-  trigger=CronTrigger(hour="3-4", minute=10),  
-  id="load_mlb_scores",  # The `id` assigned to each job MUST be unique
-  max_instances=1,
-  replace_existing=True,
-)
-logger.warning("Added job 'load_mlb_scores'.")
-
-scheduler.add_job(
-  delete_old_job_executions,
-  trigger=CronTrigger(
-    day_of_week="mon", hour="00", minute="00"
-  ),  # Midnight on Monday, before start of the next work week.
-  id="delete_old_job_executions",
-  max_instances=1,
-  replace_existing=True,
-)
-logger.warning(
-  "Added weekly job: 'delete_old_job_executions'."
-)
-
-try:
-	logger.warning("Starting scheduler...")
-	scheduler.start()
-except KeyboardInterrupt:
-	logger.warning("Stopping scheduler...")
-	scheduler.shutdown()
-	logger.warning("Scheduler shut down successfully!")
