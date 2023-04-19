@@ -121,6 +121,13 @@ WSGI_APPLICATION = 'faganweb.wsgi.application'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "False") == "True"
 
+if DEVELOPMENT_MODE == True:
+    message = "DEVELOPMENT_MODE = True"
+elif DEVELOPMENT_MODE == False:
+    message = "DEVELOPMENT_MODE = True"
+else:
+    message = "DEVELOPMENT_MODE = None"
+print(message)
 message = "sys.argv[0] = " + sys.argv[0]
 print(message)
 message = "sys.argv[1] = " + sys.argv[1]
