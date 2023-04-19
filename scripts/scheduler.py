@@ -13,6 +13,7 @@ import logging
 logger = logging.getLogger("faganweb scripts")
 
 def start():
+
 	scheduler = BackgroundScheduler(timezone=settings.TIME_ZONE)
 	scheduler.add_jobstore(DjangoJobStore(), "default")
 

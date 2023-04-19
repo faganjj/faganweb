@@ -176,7 +176,7 @@ def load_mlb_odds():
 	else:
 	# If odds were missing for any games and the time deadline has been reached, log a warning message
 	# and terminate the process.
-		if warning_found == True and current_time < deadline:
+		if warning_count > 0 and current_time < deadline:
 			message = "Warning - Odds missing for " + str(warning_count) + " game(s)."
 			logger.warning(message)
 			message = "MLB odds process not completed"
