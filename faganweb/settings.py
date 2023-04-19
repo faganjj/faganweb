@@ -134,7 +134,6 @@ if DEVELOPMENT_MODE is True:
             "HOST" : "localhost",
             "PORT" : "5432",
             "NAME": "faganweb",
-
         }
     }
 
@@ -153,7 +152,7 @@ elif len(sys.argv) ==1 or len(sys.argv) > 0 and sys.argv[1] != 'collectstatic':
             "HOST" : "app-5df5d195-9151-4927-948a-b5f52a3eb088-do-user-13406293-0.b.db.ondigitalocean.com",
             "PORT" : "25060",
             "NAME": "db",
-            }
+        }
     }
 
 # Password validation
