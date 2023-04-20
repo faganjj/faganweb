@@ -143,7 +143,7 @@ if DEVELOPMENT_MODE is True:
 
 elif sys.argv[0] == 'manage.py' and sys.argv[1] == 'collectstatic'  or  len(sys.argv) > 0 and sys.argv[1] != 'collectstatic':
     message = "DATABASE_URL = " + os.getenv("DATABASE_URL")
-    print({})
+    print(message)
     if os.getenv("DATABASE_URL", None) is None:
         raise Exception("DATABASE_URL environment variable not defined")
     DATABASES = {
