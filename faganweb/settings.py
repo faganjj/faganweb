@@ -121,6 +121,8 @@ WSGI_APPLICATION = 'faganweb.wsgi.application'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "False") == "True"
 
+SKIP_PG_EXTRA_VALIDATION = True
+
 if DEVELOPMENT_MODE is True:
     DATABASES = {
         "default": {
@@ -145,16 +147,16 @@ elif sys.argv[0] == 'manage.py' and sys.argv[1] == 'collectstatic'  or  len(sys.
     if os.getenv("DATABASE_URL", None) is None:
         raise Exception("DATABASE_URL environment variable not defined")
     DATABASES = {
-        # "default": dj_database_url.parse(os.environ.get("DATABASE_URL")),
+        "default": dj_database_url.parse(os.environ.get("DATABASE_URL")),
 
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "USER" : "db",
-            "PASSWORD" : "AVNS_dNGJh8FbV5U7lzbvK_C",
-            "HOST" : "app-5df5d195-9151-4927-948a-b5f52a3eb088-do-user-13406293-0.b.db.ondigitalocean.com",
-            "PORT" : "25060",
-            "NAME": "db",
-        }
+        # "default": {
+        #     "ENGINE": "django.db.backends.postgresql",
+        #     "USER" : "db",
+        #     "PASSWORD" : "AVNS_dNGJh8FbV5U7lzbvK_C",
+        #     "HOST" : "app-5df5d195-9151-4927-948a-b5f52a3eb088-do-user-13406293-0.b.db.ondigitalocean.com",
+        #     "PORT" : "25060",
+        #     "NAME": "db",
+        # }
     }
 
 # Password validation
