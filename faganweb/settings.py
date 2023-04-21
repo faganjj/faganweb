@@ -138,12 +138,13 @@ if DEVELOPMENT_MODE is True:
         }
     }
 
-# The "len (sys.argv) == 1" condition below had to be added to allow Djang ORM-enabled
+# The "len (sys.argv) == 1" condition below had to be added to allow Django ORM-enabled
 # scripts to run on Digital Ocean
 
 elif sys.argv[0] == 'manage.py' and sys.argv[1] == 'collectstatic'  or  len(sys.argv) > 0 and sys.argv[1] != 'collectstatic':
     if os.getenv("DATABASE_URL", None) is None:
         raise Exception("DATABASE_URL environment variable not defined")
+    print(sys.argv[0], sys.argv[1], os.getenv("DATABASE_URL"))
     DATABASES = {
         # "default": dj_database_url.parse(os.environ.get("DATABASE_URL")),
 
