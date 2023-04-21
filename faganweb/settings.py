@@ -121,7 +121,10 @@ WSGI_APPLICATION = 'faganweb.wsgi.application'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "False") == "True"
 
-
+print("sys.argv[0] = ", sys.argv[0])
+print("sys.argv[1] = ", sys.argv[1])
+db_url = os.getenv("DATABASE_URL", None)
+print("DATABASE_URL = ", db_url)
 if DEVELOPMENT_MODE is True:
     DATABASES = {
         "default": {
@@ -141,11 +144,8 @@ if DEVELOPMENT_MODE is True:
 # The "len (sys.argv) == 1" condition below had to be added to allow Django ORM-enabled
 # scripts to run on Digital Ocean
 
-elif sys.argv[0] == 'manage.py' and sys.argv[1] == 'collectstatic'  or  len(sys.argv) > 0 and sys.argv[1] != 'collectstatic':
-    print("sys.argv[0] = ", sys.argv[0])
-    print("sys.argv[1] = ", sys.argv[1])
-    db_url = os.getenv("DATABASE_URL", None)
-    print("DATABASE_URL = ", db_url)
+#elif sys.argv[0] == 'manage.py' and sys.argv[1] == 'collectstatic'  or  len(sys.argv) > 0 and sys.argv[1] != 'collectstatic':
+elif len(sys.argv) > 0 and sys.argv[1] != 'collectstatic':
     if os.getenv("DATABASE_URL", None) is None:
         raise Exception("DATABASE_URL environment variable not defined")
     DATABASES = {
