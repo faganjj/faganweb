@@ -151,10 +151,10 @@ def load_mlb_odds():
 		gamelist.append(gamedict)
 
 	# If less than 10 valid games were found, log an error message and set error_found to True.
-	if game_count < 10:
-		error_found = True
-		message = "Need 10 or more games. " + str(game_count) + " were found."
-		logger.error(message)
+	# if game_count < 10:
+	# 	error_found = True
+	# 	message = "Need 10 or more games. " + str(game_count) + " were found."
+	# 	logger.error(message)
 
 	# Check if a Contest record already exists for the upcoming period (tomorrow for MLB, 
 	# the upcoming weekend for NFL).  If so, log an error message and set error_found to True.
