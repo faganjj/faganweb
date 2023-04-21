@@ -142,8 +142,10 @@ if DEVELOPMENT_MODE is True:
 # scripts to run on Digital Ocean
 
 elif sys.argv[0] == 'manage.py' and sys.argv[1] == 'collectstatic'  or  len(sys.argv) > 0 and sys.argv[1] != 'collectstatic':
+    print("sys.argv[0] = ", sys.argv[0])
+    print("sys.argv[1] = ", sys.argv[1])
     db_url = os.getenv("DATABASE_URL", None)
-    print(sys.argv[0], sys.argv[1], db_url)
+    print("DATABASE_URL = ", db_url)
     if os.getenv("DATABASE_URL", None) is None:
         raise Exception("DATABASE_URL environment variable not defined")
     DATABASES = {
