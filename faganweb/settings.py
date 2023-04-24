@@ -121,15 +121,13 @@ WSGI_APPLICATION = 'faganweb.wsgi.application'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "False") == "True"
 
-# SKIP_PG_EXTRA_VALIDATION = True
-
 if DEVELOPMENT_MODE is True:
     DATABASES = {
         "default": {
-
-#            "ENGINE": "django.db.backends.sqlite3",
-#            "NAME": os.path.join(BASE_DIR, "db.sqlite3")
-
+            # The original test database for faganweb was an sqlite database
+            # "ENGINE": "django.db.backends.sqlite3",
+            # "NAME": os.path.join(BASE_DIR, "db.sqlite3")
+            # But we changed it to a postgres database
             "ENGINE": "django.db.backends.postgresql",
             "USER" : "jfagan",
             "PASSWORD" : "JjfAff83!",
@@ -139,16 +137,17 @@ if DEVELOPMENT_MODE is True:
         }
     }
 
-# The "len (sys.argv) == 1" condition below had to be added to allow Django ORM-enabled
-# scripts to run on Digital Ocean
-
+# The "lsys.argv[0] == 'manage.py' and sys.argv[1] == 'collectstatic'" condition below had to be added to allow
+# django_apscheduler to function.  For some reason, it does a "manage.py collectstatic" command the needs
+# database access
 elif sys.argv[0] == 'manage.py' and sys.argv[1] == 'collectstatic'  or  len(sys.argv) > 0 and sys.argv[1] != 'collectstatic':
 # elif len(sys.argv) > 0 and sys.argv[1] != 'collectstatic':
     if os.getenv("DATABASE_URL", None) is None:
         raise Exception("DATABASE_URL environment variable not defined")
     DATABASES = {
+        # After introducing django_apscheduler, the DATABASE_URL environment became inaccessible
         # "default": dj_database_url.parse(os.environ.get("DATABASE_URL")),
-
+        # So, the invividual connection string components had to be used instead.
         "default": {
             "ENGINE": "django.db.backends.postgresql",
             "USER" : "db",
@@ -190,7 +189,11 @@ USE_I18N = True
 
 USE_TZ = True
 
-SCHEDULER_DEFAULT = True
+# django_apscheduler can be diabled for the test environment
+if DEVELOPMENT_MODE is True:
+    SCHEDULER_DEFAULT = True
+else:
+    SCHEDULER_DEFAULT = True    
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/

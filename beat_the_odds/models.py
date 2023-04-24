@@ -75,3 +75,13 @@ class Pick(models.Model):
 
 	def __str__(self):
 		return f"{self.contest.league} - {self.contest.season} - {self.contest.period} - {self.participant.username} - {self.abbrev}"
+
+
+class OddsCount(models.Model):
+	date = models.DateField()
+	time = models.TimeField()
+	name = models.CharField(max_length=20)
+	count = models.IntegerField()
+
+	def __str__(self):
+		return f"{self.date} - {self.time} - {self.name} - {self.count}"

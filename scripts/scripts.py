@@ -24,13 +24,51 @@ from django_apscheduler.models import DjangoJobExecution
 
 from django.conf import settings
 
-from beat_the_odds.models import Contest, Team, Game, Result, Pick, User
+from beat_the_odds.models import Contest, Team, Game, Result, Pick, User, OddsCount
 
 def load_mlb_odds():
+
+
+
+	# Temporary logic to assess how early different Bookmakers are posting their odds
+	url = 'https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=f13fe3a3f1ea67d9a1c15d549efc719e&regions=us&markets=h2h&oddsFormat=american'
+	r = requests.get(url)
+	odds_data = r.json()	
+	curr_date = datetime.now().date()
+	curr_time = datetime.now().time()
+	b_list = []
+	for game in odds_data:
+		if game['bookmakers']:
+			bookmakers = game['bookmakers']
+			for bookmaker in bookmakers:
+				name = bookmaker['key']
+				found = False
+				for d in b_list:
+					if d['name'] == name:
+						found = True
+						count = d['count']
+						count += 1
+						d['count'] = count
+				if found == False:
+					new_entry = {'name': name, 'count': 1}
+					b_list.append(new_entry)
+	for d in b_list:
+		name = d['name']
+		count = d['count']
+		odds = OddsCount(date=curr_date, time=curr_time, name=name, count=count)
+		odds.save()
+	logger.info("Odds assessment completed")
+
+
+
+
+
 	# Issue an API call to get the latest odds in JSON format.  the-odds-api.com is being used as the data source.
 	SPORT = "baseball_mlb"
-	BOOKMAKER = "fanduel"
-	API_KEY = "f13fe3a3f1ea67d9a1c15d549efc719e"
+	# BOOKMAKER = "fanduel"
+	# API_KEY = "f13fe3a3f1ea67d9a1c15d549efc719e"
+	BOOKMAKER = os.getenv('BOOKMAKER')
+	API_KEY = os.getenv('API_KEY')
 	url = 'https://api.the-odds-api.com/v4/sports/'+ SPORT + '/odds/?apiKey=' + API_KEY + '&bookmakers=' + BOOKMAKER + '&markets=h2h&oddsFormat=american'
 	r = requests.get(url)
 	odds_data = r.json()

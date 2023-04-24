@@ -28,7 +28,7 @@ def start():
 
 	scheduler.add_job(
 	  load_mlb_odds,
-	  trigger=CronTrigger(hour="20-22", minute=10),  
+	  trigger=CronTrigger(hour="20-22", minute=18),  
 	  id="load_mlb_odds",  # The `id` assigned to each job MUST be unique
 	  max_instances=1,
 	  replace_existing=True,
