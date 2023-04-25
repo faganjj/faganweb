@@ -37,6 +37,7 @@ def load_mlb_odds():
 	curr_date = datetime.now().date()
 	curr_time = datetime.now().time()
 	current_date = datetime.now().date()
+	compare_date = current_date + timedelta(days = 1)
 	b_list = []
 	for game in odds_data:
 		game_datetime_UTC = datetime.fromisoformat(game['commence_time'].replace('Z', '+00:00'))
