@@ -21,6 +21,7 @@ from datetime import datetime, date, time, timedelta
 from zoneinfo import ZoneInfo
 from django.db.models import Sum
 from django_apscheduler.models import DjangoJobExecution
+from operator import itemgetter
 
 from django.conf import settings
 
@@ -68,6 +69,38 @@ def load_mlb_odds():
 		odds = OddsCount(date=curr_date, time=curr_time, name=name, count=count)
 		odds.save()
 	logger.info("Odds assessment completed")
+
+
+	# c = Contest.objects.get(status="Active")
+	# gamelist = c.game_set.all().order_by('game_date', 'game_time')
+
+
+	# favorite = User.objects.get(username="FAVORITES")
+	# underdog = User.objects.get(username="UNDERDOGS")
+	# picklist = []
+	# for game in gamelist:
+	# 	gamedict = {}
+	# 	gamedict['abbrev'] = game.team_away
+	# 	gamedict['game_time'] = game.game_time
+	# 	gamedict['odds'] = game.odds_away
+	# 	picklist.append(gamedict)
+	# 	gamedict = {}
+	# 	gamedict['abbrev'] = game.team_home
+	# 	gamedict['game_time'] = game.game_time
+	# 	gamedict['odds'] = game.odds_home
+	# 	picklist.append(gamedict)
+	# picklist.sort(key=itemgetter('odds'))
+	# for pick in picklist[:5]:
+	# 	abbrev = pick['abbrev']
+	# 	game_time = pick['game_time']
+	# 	p = Pick(contest=c, participant=favorite, abbrev=abbrev, game_time=game_time)
+	# 	p.save()
+	# for pick in picklist[-5:]:
+	# 	abbrev = pick['abbrev']
+	# 	game_time = pick['game_time']
+	# 	p = Pick(contest=c, participant=underdog, abbrev=abbrev, game_time=game_time)
+	# 	p.save()
+	# logger.info("Picks made for FAVORITES and UNDERDOGS")
 
 
 
@@ -255,6 +288,35 @@ def load_mlb_odds():
 
 			# Log a message that the process has completed successfully.
 			logger.info("MLB odds process completed successfully for " + str(game_count) + " games.")
+
+			# Make FAVORITES and UNDERDOGS picks
+
+			favorite = User.objects.get(username="FAVORITES")
+			underdog = User.objects.get(username="UNDERDOGS")
+			picklist = []
+			for game in gamelist:
+				gamedict = {}
+				gamedict['abbrev'] = game['team_away']
+				gamedict['game_time'] = game['game_time']
+				gamedict['odds'] = game['odds_away']
+				picklist.append(gamedict)
+				gamedict = {}
+				gamedict['abbrev'] = game['team_home']
+				gamedict['game_time'] = game['game_time']
+				gamedict['odds'] = game['odds_home']
+				picklist.append(gamedict)
+			picklist.sort(key=itemgetter('odds'))
+			for pick in picklist[:5]:
+				abbrev = pick['abbrev']
+				game_time = pick['game_time']
+				p = Pick(contest=c, participant=favorite, abbrev=abbrev, game_time=game_time)
+				p.save()
+			for pick in picklist[-5:]:
+				abbrev = pick['abbrev']
+				game_time = pick['game_time']
+				p = Pick(contest=c, participant=underdog, abbrev=abbrev, game_time=game_time)
+				p.save()
+			logger.info("Picks made for FAVORITES and UNDERDOGS")
 
 
 
