@@ -52,7 +52,7 @@ class Game(models.Model):
 	outcome_home = models.CharField(max_length=1, blank=True)
 
 	def __str__(self):
-		return f"{self.game_date}: {self.team_away} ({self.odds_away}) {self.score_away} at {self.team_home} ({self.odds_home}) {self.score_home}"
+		return f"{self.game_date} - {self.game_time}: {self.team_away} ({self.odds_away}) {self.score_away} at {self.team_home} ({self.odds_home}) {self.score_home}"
 
 class Result(models.Model):
 	participant = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -72,9 +72,10 @@ class Pick(models.Model):
 	contest = models.ForeignKey(Contest, on_delete=models.CASCADE)
 	participant = models.ForeignKey(User, on_delete=models.CASCADE)
 	abbrev = models.CharField(max_length=3)
+	game_time = models.TimeField()
 
 	def __str__(self):
-		return f"{self.contest.league} - {self.contest.season} - {self.contest.period} - {self.participant.username} - {self.abbrev}"
+		return f"{self.contest.league} - {self.contest.season} - {self.contest.period} - {self.participant.username} - {self.abbrev} - {self.game_time}"
 
 
 class OddsCount(models.Model):

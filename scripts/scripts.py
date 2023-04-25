@@ -36,8 +36,17 @@ def load_mlb_odds():
 	odds_data = r.json()	
 	curr_date = datetime.now().date()
 	curr_time = datetime.now().time()
+	current_date = datetime.now().date()
 	b_list = []
 	for game in odds_data:
+		game_datetime_UTC = datetime.fromisoformat(game['commence_time'].replace('Z', '+00:00'))
+		# Convert the UTC date/time to Eastern time.  All times in Beat the Odds are in Eastern time.
+		game_datetime_ET = game_datetime_UTC.astimezone(ZoneInfo("America/New_York"))
+		# Separate the date/time into two variables, one for date and one for time.
+		game_date = game_datetime_ET.date()
+		# If the game date is not equal to the contest date, skip this game and proceed to the next.
+		if game_date != compare_date:
+			continue
 		if game['bookmakers']:
 			bookmakers = game['bookmakers']
 			for bookmaker in bookmakers:
@@ -112,7 +121,7 @@ def load_mlb_odds():
 		# as a string in UTC-Z format (<date>T<time>Z). The Python datetime module doesn't handle this type of
 		# format directly, so some manipulation is required to change the "Z" to "+00:00"
 		game_datetime_UTC = datetime.fromisoformat(game['commence_time'].replace('Z', '+00:00'))
-		# Convert the UTC date/time to Easter time.  All times in Beat the Odds are in Eastern time.
+		# Convert the UTC date/time to Eastern time.  All times in Beat the Odds are in Eastern time.
 		game_datetime_ET = game_datetime_UTC.astimezone(ZoneInfo("America/New_York"))
 		# Separate the date/time into two variables, one for date and one for time.
 		game_date = game_datetime_ET.date()
@@ -253,7 +262,7 @@ def load_mlb_odds():
 
 
 def load_mlb_scores():
-	# Issue an API call to get the latest odds in JSON format
+	# Issue an API call to get the latest scores in JSON format
 	SPORT = "baseball_mlb"
 	API_KEY = "f13fe3a3f1ea67d9a1c15d549efc719e"
 	url = 'https://api.the-odds-api.com/v4/sports/' + SPORT + '/scores/?apiKey=' + API_KEY + '&daysFrom=1'

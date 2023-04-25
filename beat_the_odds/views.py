@@ -74,14 +74,18 @@ def makepicks(request, league):
 		mypicks = request.POST.getlist('picks')
 		# Initialize 'valid' to True prior to validation.
 		valid = True
-		# Make sure the user has made the correct 
+		# Make sure the user has made the correct number of picks.
 		if len(mypicks) != contest.num_picks:
 			valid=False
 			message = "You need to pick " + str(contest.num_picks) + " winners. You picked " + str(len(mypicks)) +". Please try again." 
 			messages.error(request, message)
 		# Make sure the user has not picked 2 winners for the same game.
 		for game in games:
-			if game.team_away in mypicks and game.team_home in mypicks:
+			compare_away = game.team_away + "," + game.game_time.strftime("%H:%M")
+			compare_home = game.team_home + "," + game.game_time.strftime("%H:%M")
+			# compare_home = game.team_home + "," + str(game.game_time)
+			print(compare_away, compare_home)
+			if compare_away in mypicks and compare_home in mypicks:
 				valid=False
 				messages.error(request, "You picked 2 winners for the same game. Please try again.")
 		# If picks are valid, delete any prior picks and save the new picks.
@@ -90,7 +94,10 @@ def makepicks(request, league):
 		if valid == True:
 			Pick.objects.filter(contest=contest, participant=user).delete()
 			for pick in mypicks:
-				p = Pick(contest=contest, participant=request.user, abbrev=pick)
+				print(pick)
+				abbrev, game_time = pick.split(",")
+				print(game_time)
+				p = Pick(contest=contest, participant=request.user, abbrev=abbrev, game_time=game_time)
 				p.save()
 			try:
 				Result.objects.get(participant=user, contest=contest)
@@ -102,7 +109,8 @@ def makepicks(request, league):
 	else:
 		picks = Pick.objects.filter(contest=contest, participant=user)
 		for pick in picks:
-			mypicks.append(pick.abbrev)
+			compare_pick = pick.abbrev + "," + pick.game_time.strftime("%H:%M")
+			mypicks.append(compare_pick)
 
 	# Build a form listing all of the games info along with checkboxes for
 	# picking winners. If prior picks have been made by this user, the 
@@ -125,14 +133,16 @@ def makepicks(request, league):
 		else:
 			game.eligible = False
 		abbrev_away = game.team_away
+		compare_away = abbrev_away + "," + game.game_time.strftime("%H:%M")
 		if len(mypicks) > 0:
-			if abbrev_away in mypicks:
+			if compare_away in mypicks:
 				game.picked_away = True
 		team_away = Team.objects.get(league=league, abbrev=abbrev_away)
 		game.name_away = team_away.name
 		abbrev_home = game.team_home
+		compare_home = abbrev_home + "," + game.game_time.strftime("%H:%M")
 		if len(mypicks) > 0:
-			if abbrev_home in mypicks:
+			if compare_home in mypicks:
 				game.picked_home = True
 		team_home = Team.objects.get(league=league, abbrev=abbrev_home)
 		game.name_home = team_home.name
