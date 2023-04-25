@@ -94,9 +94,7 @@ def makepicks(request, league):
 		if valid == True:
 			Pick.objects.filter(contest=contest, participant=user).delete()
 			for pick in mypicks:
-				print(pick)
 				abbrev, game_time = pick.split(",")
-				print(game_time)
 				p = Pick(contest=contest, participant=request.user, abbrev=abbrev, game_time=game_time)
 				p.save()
 			try:
