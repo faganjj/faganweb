@@ -71,40 +71,29 @@ def load_mlb_odds():
 	logger.info("Odds assessment completed")
 
 
-	# c = Contest.objects.get(status="Active")
-	# gamelist = c.game_set.all().order_by('game_date', 'game_time')
 
 
-	# favorite = User.objects.get(username="FAVORITES")
-	# underdog = User.objects.get(username="UNDERDOGS")
-	# picklist = []
-	# for game in gamelist:
-	# 	gamedict = {}
-	# 	gamedict['abbrev'] = game.team_away
-	# 	gamedict['game_time'] = game.game_time
-	# 	gamedict['odds'] = game.odds_away
-	# 	picklist.append(gamedict)
-	# 	gamedict = {}
-	# 	gamedict['abbrev'] = game.team_home
-	# 	gamedict['game_time'] = game.game_time
-	# 	gamedict['odds'] = game.odds_home
-	# 	picklist.append(gamedict)
-	# picklist.sort(key=itemgetter('odds'))
-	# for pick in picklist[:5]:
-	# 	abbrev = pick['abbrev']
-	# 	game_time = pick['game_time']
-	# 	p = Pick(contest=c, participant=favorite, abbrev=abbrev, game_time=game_time)
-	# 	p.save()
-	# for pick in picklist[-5:]:
-	# 	abbrev = pick['abbrev']
-	# 	game_time = pick['game_time']
-	# 	p = Pick(contest=c, participant=underdog, abbrev=abbrev, game_time=game_time)
-	# 	p.save()
-	# logger.info("Picks made for FAVORITES and UNDERDOGS")
+	# Get today's date and time
+	current_date = datetime.now().date()
+	current_time = datetime.now().time()
 
+	# Determine tomorrow's date (which will be the contest date)
+	# compare_date = current_date
+	compare_date = current_date + timedelta(days = 1)
 
-
-
+	# Check if a Contest record already exists for the upcoming period (tomorrow for MLB, 
+	# the upcoming weekend for NFL).  If so, log an informational message and return.
+	league = "MLB"
+	# The "season" format is a 4-digit year
+	season = compare_date.strftime("%Y")
+	# The "period" format is "mmm d" for MLB, "Week n" for NFL 
+	period = compare_date.strftime("%b %-d")
+	contest = Contest.objects.filter(league=league, season=season, period=period)
+	if len(contest) > 0:
+		message = "A contest record already exists for " + league + "-" + season + "-" + period
+		logger.info(message)
+		logger.info("Odds process terminated")
+		return
 
 	# Issue an API call to get the latest odds in JSON format.  the-odds-api.com is being used as the data source.
 	SPORT = "baseball_mlb"
@@ -120,14 +109,6 @@ def load_mlb_odds():
 	# filename = 'json/mlb_odds.json'
 	# with open(filename) as f:
 	# 	odds_data = json.load(f)
-
-	# Get today's date and time
-	current_date = datetime.now().date()
-	current_time = datetime.now().time()
-
-	# Determine tomorrow's date (which will be the contest date)
-	# compare_date = current_date
-	compare_date = current_date + timedelta(days = 1)
 
 	# Establish a time_of-day deadline for running the script on a particular day.  When the spript runs prior to 
 	# the deadline, it will fail if odds for one or more games have not yet been posted.  But when it runs after
@@ -237,86 +218,75 @@ def load_mlb_odds():
 	# 	message = "Need 10 or more games. " + str(game_count) + " were found."
 	# 	logger.error(message)
 
-	# Check if a Contest record already exists for the upcoming period (tomorrow for MLB, 
-	# the upcoming weekend for NFL).  If so, log an error message and set error_found to True.
-	league = "MLB"
-	# The "season" format is a 4-digit year
-	season = compare_date.strftime("%Y")
-	# The "period" format is "mmm d" for MLB, "Week n" for NFL 
-	period = compare_date.strftime("%b %-d")
-	contest = Contest.objects.filter(league=league, season=season, period=period)
-	if len(contest) > 0:
-		error_found = True
-		message = "A contest record already exists for " + league + "-" + season + "-" + period
-		logger.error(message)
-
 	# If any errors were found during validation, log an error message and terminate the process.
 	if error_found == True:
 		message = "Errors found - MLB odds process failed to complete"
 		logger.error(message)
-	else:
-	# If odds were missing for any games and the time deadline has been reached, log a warning message
+		return
+
+	# If odds were missing for any games and the time deadline has not been reached, log a warning message
 	# and terminate the process.
-		if warning_count > 0 and current_time < deadline:
-			message = "Warning - Odds missing for " + str(warning_count) + " game(s)."
-			logger.warning(message)
-			message = "MLB odds process not completed"
-			logger.warning(message)
-		else:
-			# If an active Contest record exists, change its status field to "Closed" 
-			contests = Contest.objects.filter(league=league, status="Active")
-			for c in contests:
-				c.status="Closed"
-				c.save()
+	if warning_count > 0 and current_time < deadline:
+		message = "Warning - Odds missing for " + str(warning_count) + " game(s)."
+		logger.warning(message)
+		message = "MLB odds process not completed"
+		logger.warning(message)
+		return
 
-			# Create a new Contest record for the upcoming contest.
-			c = Contest(league= league, season=season, period=period, num_picks=5, status="Active")
-			c.save()
+	# If an active Contest record exists, change its status field to "Closed" 
+	contests = Contest.objects.filter(league=league, status="Active")
+	for c in contests:
+		c.status="Closed"
+		c.save()
 
-			# For each game in gamelist, create a new Game record, associate it with the Contest record (via the
-			# foreigb key field), and populate it with the game date, game time, team names, and Moneyline odds. 
-			for game in gamelist:
-				game_date = game['game_date']
-				game_time = game['game_time']
-				team_away = game['team_away']
-				team_home = game['team_home']
-				odds_away = game['odds_away']
-				odds_home = game['odds_home']
-				g = Game(contest=c, game_date=game_date, game_time=game_time, team_away=team_away, team_home=team_home, \
-					odds_away=odds_away, odds_home=odds_home)
-				g.save()
+	# Create a new Contest record for the upcoming contest.
+	c = Contest(league= league, season=season, period=period, num_picks=5, status="Active")
+	c.save()
 
-			# Log a message that the process has completed successfully.
-			logger.info("MLB odds process completed successfully for " + str(game_count) + " games.")
+	# For each game in gamelist, create a new Game record, associate it with the Contest record (via the
+	# foreigb key field), and populate it with the game date, game time, team names, and Moneyline odds. 
+	for game in gamelist:
+		game_date = game['game_date']
+		game_time = game['game_time']
+		team_away = game['team_away']
+		team_home = game['team_home']
+		odds_away = game['odds_away']
+		odds_home = game['odds_home']
+		g = Game(contest=c, game_date=game_date, game_time=game_time, team_away=team_away, team_home=team_home, \
+			odds_away=odds_away, odds_home=odds_home)
+		g.save()
 
-			# Make FAVORITES and UNDERDOGS picks
+	# Log a message that the process has completed successfully.
+	logger.info("MLB odds process completed successfully for " + str(game_count) + " games.")
 
-			favorite = User.objects.get(username="FAVORITES")
-			underdog = User.objects.get(username="UNDERDOGS")
-			picklist = []
-			for game in gamelist:
-				gamedict = {}
-				gamedict['abbrev'] = game['team_away']
-				gamedict['game_time'] = game['game_time']
-				gamedict['odds'] = game['odds_away']
-				picklist.append(gamedict)
-				gamedict = {}
-				gamedict['abbrev'] = game['team_home']
-				gamedict['game_time'] = game['game_time']
-				gamedict['odds'] = game['odds_home']
-				picklist.append(gamedict)
-			picklist.sort(key=itemgetter('odds'))
-			for pick in picklist[:5]:
-				abbrev = pick['abbrev']
-				game_time = pick['game_time']
-				p = Pick(contest=c, participant=favorite, abbrev=abbrev, game_time=game_time)
-				p.save()
-			for pick in picklist[-5:]:
-				abbrev = pick['abbrev']
-				game_time = pick['game_time']
-				p = Pick(contest=c, participant=underdog, abbrev=abbrev, game_time=game_time)
-				p.save()
-			logger.info("Picks made for FAVORITES and UNDERDOGS")
+	# Make FAVORITES and UNDERDOGS picks
+
+	favorite = User.objects.get(username="FAVORITES")
+	underdog = User.objects.get(username="UNDERDOGS")
+	picklist = []
+	for game in gamelist:
+		gamedict = {}
+		gamedict['abbrev'] = game['team_away']
+		gamedict['game_time'] = game['game_time']
+		gamedict['odds'] = game['odds_away']
+		picklist.append(gamedict)
+		gamedict = {}
+		gamedict['abbrev'] = game['team_home']
+		gamedict['game_time'] = game['game_time']
+		gamedict['odds'] = game['odds_home']
+		picklist.append(gamedict)
+	picklist.sort(key=itemgetter('odds'))
+	for pick in picklist[:5]:
+		abbrev = pick['abbrev']
+		game_time = pick['game_time']
+		p = Pick(contest=c, participant=favorite, abbrev=abbrev, game_time=game_time)
+		p.save()
+	for pick in picklist[-5:]:
+		abbrev = pick['abbrev']
+		game_time = pick['game_time']
+		p = Pick(contest=c, participant=underdog, abbrev=abbrev, game_time=game_time)
+		p.save()
+	logger.info("Picks made for FAVORITES and UNDERDOGS")
 
 
 
