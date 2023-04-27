@@ -422,85 +422,88 @@ def load_mlb_scores():
 	if error_found == True:
 		message = "MLB scores process failed to complete"
 		logger.warning(message)
-	else:
-		# For each game in gamelist, update the corresonding Game record, populating it with the scores
-		# and outcomes. 
-		for game in gamelist:
-			team_away = game['team_away']
-			team_home = game['team_home']
-			score_away = game['score_away']
-			score_home = game['score_home']
-			outcome_away = game['outcome_away']
-			outcome_home = game['outcome_home']
-			try:
-				g = Game.objects.get(contest=contest, team_away=team_away, team_home=team_home)
-			except:
-				# If the game record does not exist, log a warning message.  This is likely because odds
-				# for this game had not been posted in time, so it was not included in the contest.
-				message = "Game record not found for " + team_away + " vs " + team_home
-				logger.warning(message)
-				continue
-			g.score_away = score_away
-			g.score_home = score_home
-			g.outcome_away = outcome_away
-			g.outcome_home = outcome_home
-			g.save()
+		return
 
-		# Tally up the points, wins, losses, and ties for each participant, and
-		# update their result record accordingly.
-		results = Result.objects.filter(contest=contest)
-		if len(results) == 0:
-			message = "There were no picks for the " + period + " contest."
-			logger.warning (message)
-			logger.info("MLB scores process completed successfully")
-		else:
-			for result in results:
-				participant = result.participant
-				picks = Pick.objects.filter(contest=contest, participant=participant)
-				mypicks = []
-				for pick in picks:
-					mypicks.append(pick.abbrev)
-				wins = losses = ties = points = 0
-				games = contest.game_set.all().order_by('game_date', 'game_time')
-				for game in games:
-					if game.team_away in mypicks:
-						if game.outcome_away == "W":
-							wins += 1
-							if game.odds_away > 0:
-								points += game.odds_away
-							else:
-								points += round(-100 / (game.odds_away/100))
-						if game.outcome_away == "L":
-							losses += 1
-							points -= 100
-						if game.outcome_away == "T":
-							ties += 1
-					if game.team_home in mypicks:
-						if game.outcome_home == "W":
-							wins += 1
-							if game.odds_home > 0:
-								points += game.odds_home
-							else:
-								points += round(-100 / (game.odds_home/100))
-						if game.outcome_home == "L":
-							losses += 1
-							points -= 100
-						if game.outcome_home == "T":
-							ties += 1
-				result.wins = wins
-				result.losses = losses
-				result.ties = ties
-				result.points = points
-				result.save()
-			# Determine the winner of the contest and update the winner field in the Contest record.
-			results = Result.objects.filter(contest=contest).order_by("-points")
-			contest.winner = results[0].participant.username
-			# Change the status of the contest to "Complete", and send a 
-			# messsage indicating success.
-			contest.status = "Complete"
-			contest.save()
+	# For each game in gamelist, update the corresonding Game record, populating it with the scores
+	# and outcomes. 
+	for game in gamelist:
+		team_away = game['team_away']
+		team_home = game['team_home']
+		score_away = game['score_away']
+		score_home = game['score_home']
+		outcome_away = game['outcome_away']
+		outcome_home = game['outcome_home']
+		try:
+			g = Game.objects.get(contest=contest, team_away=team_away, team_home=team_home)
+		except:
+			# If the game record does not exist, log a warning message.  This is likely because odds
+			# for this game had not been posted in time, so it was not included in the contest.
+			message = "Game record not found for " + team_away + " vs " + team_home
+			logger.warning(message)
+			continue
+		g.score_away = score_away
+		g.score_home = score_home
+		g.outcome_away = outcome_away
+		g.outcome_home = outcome_home
+		g.save()
 
-			logger.info("MLB scores process completed successfully")
+	# If no picks were made for the contest, log a message and terminate the process.
+	results = Result.objects.filter(contest=contest)
+	if len(results) == 0:
+		message = "There were no picks for the " + period + " contest."
+		logger.warning (message)
+		logger.info("MLB scores process completed successfully")
+		return
+
+	# Tally up the points, wins, losses, and ties for each participant, and
+	# update their result record accordingly.
+	for result in results:
+		participant = result.participant
+		picks = Pick.objects.filter(contest=contest, participant=participant)
+		mypicks = []
+		for pick in picks:
+			mypicks.append(pick.abbrev)
+		wins = losses = ties = points = 0
+		games = contest.game_set.all().order_by('game_date', 'game_time')
+		for game in games:
+			if game.team_away in mypicks:
+				if game.outcome_away == "W":
+					wins += 1
+					if game.odds_away > 0:
+						points += game.odds_away
+					else:
+						points += round(-100 / (game.odds_away/100))
+				if game.outcome_away == "L":
+					losses += 1
+					points -= 100
+				if game.outcome_away == "T":
+					ties += 1
+			if game.team_home in mypicks:
+				if game.outcome_home == "W":
+					wins += 1
+					if game.odds_home > 0:
+						points += game.odds_home
+					else:
+						points += round(-100 / (game.odds_home/100))
+				if game.outcome_home == "L":
+					losses += 1
+					points -= 100
+				if game.outcome_home == "T":
+					ties += 1
+		result.wins = wins
+		result.losses = losses
+		result.ties = ties
+		result.points = points
+		result.save()
+	# Determine the winner of the contest and update the winner field in the Contest record.
+	results = Result.objects.filter(contest=contest).order_by("-points")
+	contest.winner = results[0].participant.username
+	# Change the status of the contest to "Complete", and send a 
+	# messsage indicating success.
+	contest.status = "Complete"
+	contest.save()
+
+	logger.info("MLB scores process completed successfully")
 
 
 
