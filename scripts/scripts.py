@@ -281,11 +281,16 @@ def load_mlb_odds():
 		game_time = pick['game_time']
 		p = Pick(contest=c, participant=favorite, abbrev=abbrev, game_time=game_time)
 		p.save()
+	r = Result(participant=favorite, contest=c, wins=0, losses=0, ties=0, points=0)
+	r.save()
 	for pick in picklist[-5:]:
 		abbrev = pick['abbrev']
 		game_time = pick['game_time']
 		p = Pick(contest=c, participant=underdog, abbrev=abbrev, game_time=game_time)
 		p.save()
+	r = Result(participant=underdog, contest=c, wins=0, losses=0, ties=0, points=0)
+	r.save()
+
 	logger.info("Picks made for FAVORITES and UNDERDOGS")
 
 
@@ -295,6 +300,7 @@ def load_mlb_odds():
 
 
 def load_mlb_scores():
+
 	# Issue an API call to get the latest scores in JSON format
 	SPORT = "baseball_mlb"
 	API_KEY = "f13fe3a3f1ea67d9a1c15d549efc719e"
