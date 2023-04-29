@@ -82,7 +82,12 @@
       <td></td>
     {% endif %}
 -->
-    <td class="text-right pl-5"><h5>{{ game.mypoints }}</h5></td>
+    {% if game.mypoints > 0 %}
+      <td class="text-right text-success pl-5"><h5>{{ game.mypoints }}</h5></td>
+    {% else %}
+      <td class="text-right text-danger pl-5"><h5>{{ game.mypoints }}</h5></td>
+    {% endif %}
+
 
 </tr>
 

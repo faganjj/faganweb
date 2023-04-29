@@ -17,11 +17,11 @@
     <tr>
       <th scope="col">#</th>
       <th scope="col">Date-Time</th>
-      <th scope="col"></th>
+      <th scope="col" class="border-left"></th>
       <th scope="col">Visiting Team</th>
       <th scope="col">Moneyline</th>
       <th scope="col text-right">Points</th>
-      <th scope="col"></th>
+      <th scope="col" class="border-left"></th>
       <th scope="col">Home Team</th>
       <th scope="col">Moneyline</th>
       <th scope="col text-right">Points</th>
@@ -30,43 +30,52 @@
   <tbody>
 
   {% for game in games %}
-    <tr>
+    <tr class="border-bottom">
       <th scope="row">{{ forloop.counter }}</th>
       <td>{{ game.game_date|date:"SHORT_DATE_FORMAT" }}-{{ game.game_time|time:"G:i" }}</td>
       {% if game.eligible == True %}
         {% if game.picked_away == True %}
-          <td class="pl-5"><input type=checkbox name="picks" value="{{ game.team_away }},{{ game.game_time|time:'G:i' }}" checked></td>
+          <td class="pl-5 border-left"><input type=checkbox name="picks" value="{{ game.team_away }},{{ game.game_time|time:'G:i' }}" checked></td>
         {% else %}
-          <td class="pl-5"><input type=checkbox name="picks" value="{{ game.team_away }},{{ game.game_time|time:'G:i' }}"></td>
+          <td class="pl-5 border-left"><input type=checkbox name="picks" value="{{ game.team_away }},{{ game.game_time|time:'G:i' }}"></td>
         {% endif %}
       {% else %}
         {% if game.picked_away == True %}
-          <td class="pl-5"><input type=checkbox checked disabled></td>
+          <td class="pl-5 border-left"><input type=checkbox checked disabled></td>
           <input type="hidden" name="picks" value="{{ game.team_away }}">
         {% else %}
-          <td class="pl-5"><input type=checkbox disabled></td>
+          <td class="pl-5 border-left"><input type=checkbox disabled></td>
         {% endif %}
-      {% endif %}    
+      {% endif %}  
       <td>{{ game.name_away }}</td>
-      <td class="text-center">{{ game.odds_away }}</td>
-      <td class="text-right">{{ game.points_away }}</td>
+      {% if game.odds_away > 0 %}
+        <td class="text-center">+{{ game.odds_away }}</td>
+      {% else %}
+          <td class="text-center">{{ game.odds_away }}</td>
+      {% endif %}
+      <td class="text-right font-weight-bold">{{ game.points_away }}</td>
       {% if game.eligible == True %} 
         {% if game.picked_home == True %}
-          <td class="pl-5"><input type="checkbox" name="picks" value="{{ game.team_home }},{{ game.game_time|time:'G:i' }}" checked></td>
+          <td class="pl-5 border-left"><input type="checkbox" name="picks" value="{{ game.team_home }},{{ game.game_time|time:'G:i' }}" checked></td>
         {% else %}
-          <td class="pl-5"><input type="checkbox" name="picks" value="{{ game.team_home }},{{ game.game_time|time:'G:i' }}"></td>
+          <td class="pl-5 border-left"><input type="checkbox" name="picks" value="{{ game.team_home }},{{ game.game_time|time:'G:i' }}"></td>
         {% endif %}
       {% else %}
         {% if game.picked_home == True %}
           <input type="hidden" name="picks" value="{{ game.team_home }}">
-          <td class="pl-5"><input type="checkbox" checked disabled></td>
+          <td class="pl-5 border-left"><input type="checkbox" checked disabled></td>
         {% else %}
-          <td class="pl-5"><input type="checkbox" disabled></td>
+          <td class="pl-5 border-left"><input type="checkbox" disabled></td>
         {% endif %}
       {% endif %}  
       <td>{{ game.name_home }}</td>
-      <td class="text-center">{{ game.odds_home }}</td>
-      <td class="text-right">{{ game.points_home }}</td>
+      {% if game.odds_home > 0 %}
+        <td class="text-center">+{{ game.odds_home }}</td>
+      {% else %}
+          <td class="text-center">{{ game.odds_home }}</td>
+      {% endif %}
+      <td class="text-right font-weight-bold">{{ game.points_home }}</td>
+
     </tr>
 
   {% endfor %}  
