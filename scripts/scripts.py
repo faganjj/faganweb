@@ -450,7 +450,7 @@ def load_mlb_scores():
 	games = contest.game_set.all().order_by('game_date', 'game_time')
 	for game in games:
 		# Check if a game has an outcome of None
-		if game.outcome_away = None and game.outcome_home = None:
+		if game.outcome_away == None and game.outcome_home == None:
 			# Treat the game as a 0-0 tie
 			game.score_away = 0
 			game.score_home = 0
