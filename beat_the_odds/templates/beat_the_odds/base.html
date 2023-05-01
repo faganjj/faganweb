@@ -25,6 +25,7 @@
 
       <ul class="navbar-nav mr-auto">
         <li class="nav-item">
+          <a class="nav-link" href="{% url 'beat_the_odds:index' %}">Picks</a></li>
           <a class="nav-link" href="{% url 'beat_the_odds:results' %}">Results</a></li>
           <a class="nav-link" href="{% url 'beat_the_odds:ranking' %}">Ranking</a></li>
       </ul>
@@ -39,7 +40,7 @@
           </li>
         {% else %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'users:register' %}">Register</a>
+            <a class="nav-link" href="{% url 'users:register' %}?next={{ request.path }}">Register</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{% url 'users:login' %}?next={{ request.path }}">Log in</a>

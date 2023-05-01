@@ -2,20 +2,19 @@
 
 {% block page_header %}
 
-{% include 'beat_the_odds/includes/messages.html' %}
-
 <h2 class="text-center">Results for {{ user.username }}</h2>
-<form action="{% url 'beat_the_odds:results' %}" method="post">
+<form class="form-inline" action="{% url 'beat_the_odds:results' %}" method="post">
   {% csrf_token %}
   <label class="lead" for="league">Select a league:</label>
-  <select name="league" id="league">
+  <select class="ml-1" name="league" id="league">
     <option value="NFL"{% if league == "NFL" %}selected{% endif %}>NFL</option>
     <option value="MLB"{% if league == "MLB" %}selected{% endif %}>MLB</option>
   </select>
-  <br>
-  <input class="btn btn-sm btn-primary" type="submit" value="Show Results" />
+  <input class="btn btn-sm btn-primary ml-3" type="submit" value="Show Results"/>
 </form>
 <br>
+
+{% include 'beat_the_odds/includes/messages.html' %}
 
 {% endblock page_header %} 
 

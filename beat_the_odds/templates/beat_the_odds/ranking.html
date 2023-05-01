@@ -2,27 +2,30 @@
 
 {% block page_header %}
 
-{% include 'beat_the_odds/includes/messages.html' %}
-
 <h2 class="text-center">Participant Ranking</h2>
 <br>
-<form action="{% url 'beat_the_odds:ranking' %}" method="post">
+<form class="form-inline" action="{% url 'beat_the_odds:ranking' %}" method="post">
   {% csrf_token %}
   <label class="lead" for="league">Select league:</label>
-  <select name="league" id="league">
+  <select class="ml-1" name="league" id="league">
     <option value="NFL"{% if league == "NFL" %}selected{% endif %}>NFL</option>
     <option value="MLB"{% if league == "MLB" %}selected{% endif %}>MLB</option>
   </select>
-  <br>
-  <label class="lead" for="scope">Select scope:</label>  
-  <select name="scope" id="scope">
+  <label class="lead ml-3" for="scope">Select scope:</label>  
+  <select class="ml-1" name="scope" id="scope">
+    <option value="contest"{% if scope == "contest" %}selected{% endif %}>Latest Contest</option>
+    <option value="season"{% if scope == "season" %}selected{% endif %}>Season To-Date</option>
+    <!--
     <option value="contest">Latest Contest</option>
     <option value="season">Season To-Date</option>
+    -->
   </select>
   <br>
-  <input class="btn btn-sm btn-primary" type="submit" value="Show Ranking" />
+  <input class="btn btn-sm btn-primary ml-3" type="submit" value="Show Ranking" />
 </form>
 <br>
+
+{% include 'beat_the_odds/includes/messages.html' %}
 
 {% endblock page_header %} 
 

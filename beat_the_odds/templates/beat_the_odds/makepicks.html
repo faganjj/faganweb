@@ -32,7 +32,7 @@
   {% for game in games %}
     <tr class="border-bottom">
       <th scope="row">{{ forloop.counter }}</th>
-      <td>{{ game.game_date|date:"SHORT_DATE_FORMAT" }}-{{ game.game_time|time:"G:i" }}</td>
+      <td>{{ game.game_date|date:"n/j" }} - {{ game.game_time|time:"g:i a" }}</td>
       {% if game.eligible == True %}
         {% if game.picked_away == True %}
           <td class="pl-5 border-left"><input type=checkbox name="picks" value="{{ game.team_away }},{{ game.game_time|time:'G:i' }}" checked></td>

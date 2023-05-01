@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, reverse
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.http import Http404
@@ -34,33 +34,141 @@ def index(request):
 	league = contest.league
 	context = {'league': league}
 
-	# Check the Make Picks" button has been clicked.  If not, render 
+	# Check if the "Make Picks" button has been clicked.  If not, render 
 	# the index.html template.
 	if request.method == 'POST':
+
+		if not request.user.is_authenticated:
+			messages.warning(request, 'You must be logged in to continue.  Click "Log in" in the navigation bar above.')
+			messages.warning(request, 'If you do not already have a FaganWeb account, click "Register" instead.')
+			return redirect('beat_the_odds:index')
+
 		league = request.POST.get('league')
 
 	# Check if there is an active contest for the selected league.
-	# If so, redirect to the makepicks page.  If not, issue a 
+	# If so, redirect to the index view.  If not, issue a 
 	# warning message and re-render index.html
 		try:
 			Contest.objects.get(league=league, status='Active') 
 		except:
 			message = "No active " + league + " contest"
 			messages.warning(request, message)
+			return redirect('beat_the_odds:index')
+
+		user = request.user
+		# Get all of the game records for the active contest ("game_set" uses
+		# one-to-many relationship to get the game records).
+		games = contest.game_set.all().order_by('game_date', 'game_time')
+		mypicks = []
+
+		# Check if the Submit button has been clicked.  If so, validate and
+		# save the picks.  If not, get the user's prior picks (if there are any)
+		# in case they want to change them.
+		if request.method == 'POST' and 'submitpicks' in request.POST:
+			mypicks = request.POST.getlist('picks')
+			# Initialize 'valid' to True prior to validation.
+			valid = True
+			# Make sure the user has made the correct number of picks.
+			if len(mypicks) != contest.num_picks:
+				valid=False
+				message = "You need to pick " + str(contest.num_picks) + " winners. You picked " + str(len(mypicks)) +". Please try again." 
+				messages.error(request, message)
+			# Make sure the user has not picked 2 winners for the same game.
+			for game in games:
+				compare_away = game.team_away + "," + game.game_time.strftime("%H:%M")
+				compare_home = game.team_home + "," + game.game_time.strftime("%H:%M")
+				# compare_home = game.team_home + "," + str(game.game_time)
+				if compare_away in mypicks and compare_home in mypicks:
+					valid=False
+					messages.error(request, "You picked 2 winners for the same game. Please try again.")
+			# If picks are valid, delete any prior picks and save the new picks.
+			# Also, create an initialized Result record for the user.  It serves as a
+			# junction record between Contest and User.
+			if valid == True:
+				Pick.objects.filter(contest=contest, participant=user).delete()
+				for pick in mypicks:
+					abbrev, game_time = pick.split(",")
+					p = Pick(contest=contest, participant=request.user, abbrev=abbrev, game_time=game_time)
+					p.save()
+				try:
+					Result.objects.get(participant=user, contest=contest)
+				except:
+					r = Result(participant=user, contest=contest, wins=0, losses=0, ties=0, points=0)
+					r.save()
+				messages.success(request, "Your picks have been submitted!")
+				return redirect('beat_the_odds:index')
 		else:
-			return redirect('beat_the_odds:makepicks', league)
+			picks = Pick.objects.filter(contest=contest, participant=user)
+			for pick in picks:
+				compare_pick = pick.abbrev + "," + pick.game_time.strftime("%H:%M")
+				mypicks.append(compare_pick)
+
+		# Build a form listing all of the games info along with checkboxes for
+		# picking winners. If prior picks have been made by this user, the 
+		# picked-away and picked-home fields will be used to instruct the template
+		# where to put checkmarks.
+		season = contest.season
+		period = contest.period
+		num_picks = contest.num_picks
+		# Get today's date.  It will be compared to each game date, to determine
+		# if the gsme can be legitimately picked.
+		compare_date = date.today()
+		compare_time = datetime.now().time()
+		# But if the contest record has been created for test purposes, set the 
+		# compare date to an arbitrary date in the past.
+		if contest.test_contest:
+			compare_date = date(2000,1,1)
+		for game in games:
+			if compare_date < game.game_date or (compare_date == game.game_date and compare_time < game.game_time):
+				game.eligible = True
+			else:
+				game.eligible = False
+			abbrev_away = game.team_away
+			compare_away = abbrev_away + "," + game.game_time.strftime("%H:%M")
+			if len(mypicks) > 0:
+				if compare_away in mypicks:
+					game.picked_away = True
+			team_away = Team.objects.get(league=league, abbrev=abbrev_away)
+			game.name_away = team_away.name
+			abbrev_home = game.team_home
+			compare_home = abbrev_home + "," + game.game_time.strftime("%H:%M")
+			if len(mypicks) > 0:
+				if compare_home in mypicks:
+					game.picked_home = True
+			team_home = Team.objects.get(league=league, abbrev=abbrev_home)
+			game.name_home = team_home.name
+			if game.odds_away > 0:
+				game.points_away = game.odds_away
+			else:
+				game.points_away = round(-100 / (game.odds_away/100))
+			if game.odds_home > 0:
+				game.points_home = game.odds_home
+			else:
+				game.points_home = round(-100 / (game.odds_home/100))	
+
+		context = {'league': league, 'season': season, 'period': period, 'num_picks': num_picks, \
+			'games': games, 'compare_date': compare_date}
+
 	return render(request, 'beat_the_odds/index.html', context)
 
 
 # If the user is not logged-in, redirect to the login page.
+
 @login_required
 def makepicks(request, league):
+	print("I'm in makepicks")
 	""" Create a form for picking winners of games """
 
-	# Get the active contest record for the specified league. There should
-	# only be one.
-	contest = Contest.objects.get(league=league, status='Active')
-	
+	# Check if there is an active contest for the selected league.
+	# If so, redirect to the index view.  If not, issue a 
+	# warning message and re-render index.html
+	try:
+		Contest.objects.get(league=league, status='Active') 
+	except:
+		message = "No active " + league + " contest"
+		messages.warning(request, message)
+		return redirect('beat_the_odds:index')
+
 	user = request.user
 	# Get all of the game records for the active contest ("game_set" uses
 	# one-to-many relationship to get the game records).
