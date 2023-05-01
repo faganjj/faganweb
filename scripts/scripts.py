@@ -29,8 +29,6 @@ from beat_the_odds.models import Contest, Team, Game, Result, Pick, User, OddsCo
 
 def load_mlb_odds():
 
-
-
 	# Temporary logic to assess how early different Bookmakers are posting their odds
 	url = 'https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=f13fe3a3f1ea67d9a1c15d549efc719e&regions=us&markets=h2h&oddsFormat=american'
 	r = requests.get(url)
@@ -304,7 +302,7 @@ def load_mlb_scores():
 	# Issue an API call to get the latest scores in JSON format
 	SPORT = "baseball_mlb"
 	API_KEY = "f13fe3a3f1ea67d9a1c15d549efc719e"
-	url = 'https://api.the-odds-api.com/v4/sports/' + SPORT + '/scores/?apiKey=' + API_KEY + '&daysFrom=1'
+	url = 'https://api.the-odds-api.com/v4/sports/' + SPORT + '/scores/?apiKey=' + API_KEY + '&daysFrom=2'
 	r = requests.get(url)
 	odds_data = r.json()
 
@@ -406,7 +404,7 @@ def load_mlb_scores():
 		message = "No game records found."
 		logger.error(message)
 
-	# Get the Contest record for the recently completed contest (yesterdayfor MLB, 
+	# Get the Contest record for the recently completed contest (yesterday for MLB, 
 	# the prior weekend for NFL).  If no Contest record found, log an error message
 	# and terminate the process.
 	league = "MLB"
@@ -446,6 +444,22 @@ def load_mlb_scores():
 		g.outcome_away = outcome_away
 		g.outcome_home = outcome_home
 		g.save()
+
+	# Now process the Game records in the database to see if any games were missing from odds_data
+	# (another potential indicator of a game that may have been suspended for rain or some other reason)
+	games = contest.game_set.all().order_by('game_date', 'game_time')
+	for game in games:
+		# Check if a game has an outcome of None
+		if game.outcome_away = None and game.outcome_home = None:
+			# Treat the game as a 0-0 tie
+			game.score_away = 0
+			game.score_home = 0
+			game.outcome_away = "T"
+			game.outcome_home = "T"
+			game.save()
+			scores_missing += 1
+			message = "Scores missing for " + game.team_away + " vs " + game.team_home + ". Rainout?"
+			logger.warning(message)
 
 	# If no picks were made for the contest, log a message and terminate the process.
 	results = Result.objects.filter(contest=contest)
