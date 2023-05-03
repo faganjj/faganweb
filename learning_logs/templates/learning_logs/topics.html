@@ -8,9 +8,11 @@
 
   <ul>
     {% for topic in topics %}
+      {% if topic.owner == request.user or topic.scope == 'Public' %}
       <li><h4>
         <a href="{% url 'learning_logs:topic' topic.id %}">{{ topic }}</a>
       </h4></li>
+      {% endif %}
     {% empty %}
       <li><h4>No topics have been added yet. </h4></li>
     {% endfor %}
