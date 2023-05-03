@@ -29,46 +29,44 @@ from beat_the_odds.models import Contest, Team, Game, Result, Pick, User, OddsCo
 
 def load_mlb_odds():
 
-	# Temporary logic to assess how early different Bookmakers are posting their odds
-	url = 'https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=f13fe3a3f1ea67d9a1c15d549efc719e&regions=us&markets=h2h&oddsFormat=american'
-	r = requests.get(url)
-	odds_data = r.json()	
-	curr_date = datetime.now().date()
-	curr_time = datetime.now().time()
-	current_date = datetime.now().date()
-	compare_date = current_date + timedelta(days = 1)
-	b_list = []
-	for game in odds_data:
-		game_datetime_UTC = datetime.fromisoformat(game['commence_time'].replace('Z', '+00:00'))
-		# Convert the UTC date/time to Eastern time.  All times in Beat the Odds are in Eastern time.
-		game_datetime_ET = game_datetime_UTC.astimezone(ZoneInfo("America/New_York"))
-		# Separate the date/time into two variables, one for date and one for time.
-		game_date = game_datetime_ET.date()
-		# If the game date is not equal to the contest date, skip this game and proceed to the next.
-		if game_date != compare_date:
-			continue
-		if game['bookmakers']:
-			bookmakers = game['bookmakers']
-			for bookmaker in bookmakers:
-				name = bookmaker['key']
-				found = False
-				for d in b_list:
-					if d['name'] == name:
-						found = True
-						count = d['count']
-						count += 1
-						d['count'] = count
-				if found == False:
-					new_entry = {'name': name, 'count': 1}
-					b_list.append(new_entry)
-	for d in b_list:
-		name = d['name']
-		count = d['count']
-		odds = OddsCount(date=curr_date, time=curr_time, name=name, count=count)
-		odds.save()
-	logger.info("Odds assessment completed")
-
-
+	# # Temporary logic to assess how early different Bookmakers are posting their odds
+	# url = 'https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=f13fe3a3f1ea67d9a1c15d549efc719e&regions=us&markets=h2h&oddsFormat=american'
+	# r = requests.get(url)
+	# odds_data = r.json()	
+	# curr_date = datetime.now().date()
+	# curr_time = datetime.now().time()
+	# current_date = datetime.now().date()
+	# compare_date = current_date + timedelta(days = 1)
+	# b_list = []
+	# for game in odds_data:
+	# 	game_datetime_UTC = datetime.fromisoformat(game['commence_time'].replace('Z', '+00:00'))
+	# 	# Convert the UTC date/time to Eastern time.  All times in Beat the Odds are in Eastern time.
+	# 	game_datetime_ET = game_datetime_UTC.astimezone(ZoneInfo("America/New_York"))
+	# 	# Separate the date/time into two variables, one for date and one for time.
+	# 	game_date = game_datetime_ET.date()
+	# 	# If the game date is not equal to the contest date, skip this game and proceed to the next.
+	# 	if game_date != compare_date:
+	# 		continue
+	# 	if game['bookmakers']:
+	# 		bookmakers = game['bookmakers']
+	# 		for bookmaker in bookmakers:
+	# 			name = bookmaker['key']
+	# 			found = False
+	# 			for d in b_list:
+	# 				if d['name'] == name:
+	# 					found = True
+	# 					count = d['count']
+	# 					count += 1
+	# 					d['count'] = count
+	# 			if found == False:
+	# 				new_entry = {'name': name, 'count': 1}
+	# 				b_list.append(new_entry)
+	# for d in b_list:
+	# 	name = d['name']
+	# 	count = d['count']
+	# 	odds = OddsCount(date=curr_date, time=curr_time, name=name, count=count)
+	# 	odds.save()
+	# logger.info("Odds assessment completed")
 
 
 	# Get today's date and time
