@@ -156,7 +156,6 @@ def index(request):
 
 @login_required
 def makepicks(request, league):
-	print("I'm in makepicks")
 	""" Create a form for picking winners of games """
 
 	# Check if there is an active contest for the selected league.
@@ -192,7 +191,6 @@ def makepicks(request, league):
 			compare_away = game.team_away + "," + game.game_time.strftime("%H:%M")
 			compare_home = game.team_home + "," + game.game_time.strftime("%H:%M")
 			# compare_home = game.team_home + "," + str(game.game_time)
-			print(compare_away, compare_home)
 			if compare_away in mypicks and compare_home in mypicks:
 				valid=False
 				messages.error(request, "You picked 2 winners for the same game. Please try again.")
@@ -284,66 +282,85 @@ def results(request):
 	# the most recent results.
 	if request.method == 'POST':
 		league = request.POST.get('league')
-		# Get the most recent contest with a status of "Complete" for the
-		# selected league.
-		try:
-			contest = Contest.objects.filter(league=league, status='Complete').order_by('-id')[0]
-		except:
-			message = "No " + league + " results yet"
-			messages.warning(request, message)
-			return redirect('beat_the_odds:results')
-		user = request.user
-		results = contest.game_set.all()
+		scope = request.POST.get('scope')
+		# Get the most recent contest record for the selected league, and determine 
+		# the cuurrent season for that league
+		contest = Contest.objects.filter(league=league).order_by('-id')[0]
 		season = contest.season
-		period = contest.period
-		# get all of the user's picks for the contest.
-		picks = Pick.objects.filter(contest=contest, participant=user)
-		if len(picks) == 0:
+		user = request.user
+		# Get all of the result records for the user for the current league and season
+		results = Result.objects.filter(participant=user, contest__league=league, contest__season=season).order_by('-id')
+		if len(results) == 0:
 			message = "No " + league + " results yet"
 			messages.warning(request, message)
 			return redirect('beat_the_odds:results')
-		# Get all of the game records for the mot recent completed contest
-		games = contest.game_set.all()
-		mypicks = []
-		for pick in picks:
-			mypicks.append(pick.abbrev)
-		mytotal = 0
-		# All of the game redords will be passed to the template, but the 
-		# template will only display the games with picked_away or 
-		# picked_home = True
-		for game in games:
-			if game.team_away in mypicks or game.team_home in mypicks:
-				team_away = Team.objects.get(league=league, abbrev=game.team_away)
-				game.name_away = team_away.name
-				team_home = Team.objects.get(league=league, abbrev=game.team_home)
-				game.name_home = team_home.name
-				if game.team_away in mypicks:
-					game.picked_away = True
-					if game.odds_away > 0:
-						game.points_away = game.odds_away
-					else:
-						game.points_away = round(-100 / (game.odds_away/100))
-					if game.outcome_away == "W":
-						game.mypoints = game.points_away
-					elif game.outcome_away == "L":
-						game.mypoints = -100
-					elif game.outcome_away == "T":
-						game.mypoints = 0
-					mytotal += game.mypoints
-				if game.team_home in mypicks:
-					game.picked_home = True
-					if game.odds_home > 0:
-						game.points_home = game.odds_home
-					else:
-						game.points_home = round(-100 / (game.odds_home/100))	
-					if game.outcome_home == "W":
-						game.mypoints = game.points_home
-					elif game.outcome_home == "L":
-						game.mypoints = -100
-					elif game.outcome_home == "T":
-						game.mypoints = 0
-					mytotal += game.mypoints
-		context = {'league': league, 'season': season, 'period': period, 'games': games, 'mytotal': mytotal}
+		# Process the user's results records
+		result_count = 0
+		gamelist = []
+		for result in results:
+			if result.contest.status == "Active":
+				continue
+			if result.contest.status == "Complete":
+				result_count +=1
+			if scope == "latest" and result_count > 1:
+				break
+			period = result.contest.period
+			# Get all of the user's picks for the contest associated with this result record.
+			picks = Pick.objects.filter(contest=result.contest, participant=user)
+			mypicks = []
+			for pick in picks:
+				mypicks.append(pick.abbrev)
+			# Get all of the game records for the contest associated with this result record.
+			games = result.contest.game_set.all()
+			mytotal = 0
+			pick_count = 0
+			# All of the game redords will be passed to the template, but the 
+			# template will only display the games with picked_away or 
+			# picked_home = True
+
+			for game in games:
+				if game.team_away in mypicks or game.team_home in mypicks:
+					pick_count += 1
+					game.period = period
+					game.picknum = pick_count
+					game.num_picks = result.contest.num_picks
+					game.status = result.contest.status
+					team_away = Team.objects.get(league=league, abbrev=game.team_away)
+					game.name_away = team_away.name
+					team_home = Team.objects.get(league=league, abbrev=game.team_home)
+					game.name_home = team_home.name
+					if game.team_away in mypicks:
+						game.picked_away = True
+						if game.status == "Complete":
+							if game.odds_away > 0:
+								game.points_away = game.odds_away
+							else:
+								game.points_away = round(-100 / (game.odds_away/100))
+							if game.outcome_away == "W":
+								game.mypoints = game.points_away
+							elif game.outcome_away == "L":
+								game.mypoints = -100
+							elif game.outcome_away == "T":
+								game.mypoints = 0
+							mytotal += game.mypoints
+							game.mytotal = mytotal 
+					if game.team_home in mypicks:
+						game.picked_home = True
+						if game.status == "Complete":
+							if game.odds_home > 0:
+								game.points_home = game.odds_home
+							else:
+								game.points_home = round(-100 / (game.odds_home/100))	
+							if game.outcome_home == "W":
+								game.mypoints = game.points_home
+							elif game.outcome_home == "L":
+								game.mypoints = -100
+							elif game.outcome_home == "T":
+								game.mypoints = 0
+							mytotal += game.mypoints
+							game.mytotal = mytotal
+					gamelist.append(game)
+		context = {'league': league, 'season': season, 'period': period, 'scope': scope, 'games': gamelist}
 	return render(request, 'beat_the_odds/results.html', context)
 
 
