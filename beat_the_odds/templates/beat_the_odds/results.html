@@ -66,9 +66,9 @@
         {% if game.picked_away == True %}
         <td class="pl-5"><input type=checkbox name="picks" value="{{ game.team_away }}" checked></td>
           {% if game.outcome_away == "W" %}
-            <td class="text-success">{{ game.name_away }}</td>
+            <td class="table-success">{{ game.name_away }}</td>
           {% elif game.outcome_away == "L" %}
-            <td class="text-danger">{{ game.name_away }}</td>
+            <td class="table-danger">{{ game.name_away }}</td>
           {% else %}
             <td>{{ game.name_away }}</td>
           {% endif %}
@@ -91,9 +91,9 @@
         {% if game.picked_home == True %}
         <td class="pl-5"><input type=checkbox name="picks" value="{{ game.team_home }}" checked></td>
           {% if game.outcome_home == "W" %}
-            <td class="text-success">{{ game.name_home }}</td>
+            <td class="table-success">{{ game.name_home }}</td>
           {% elif game.outcome_home == "L" %}
-            <td class="text-danger">{{ game.name_home }}</td>
+            <td class="table-danger">{{ game.name_home }}</td>
           {% else %}
             <td>{{ game.name_home }}</td>
           {% endif %}
@@ -122,9 +122,9 @@
         {% endif %} 
         --> 
         {% if game.mypoints > 0 %}
-          <td class="text-right text-success pl-5"><h5>{{ game.mypoints }}</h5></td>
+          <td class="text-right table-success pl-5"><h5>{{ game.mypoints }}</h5></td>
         {% else %}
-          <td class="text-right text-danger pl-5"><h5>{{ game.mypoints }}</h5></td>
+          <td class="text-right table-danger pl-5"><h5>{{ game.mypoints }}</h5></td>
         {% endif %}
 
     </tr>
