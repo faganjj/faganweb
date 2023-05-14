@@ -208,7 +208,7 @@ def load_mlb_odds():
 		# Add this game to the "gamelist" list.
 		gamelist.append(gamedict)
 
-	If less than 5 valid games were found, log an error message and set error_found to True.
+	# If less than 5 valid games were found, log an error message and set error_found to True.
 	if game_count < 5:
 		error_found = True
 		message = "Need 5 or more games. " + str(game_count) + " were found."
