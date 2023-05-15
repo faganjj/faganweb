@@ -284,13 +284,13 @@ def results(request):
 		league = request.POST.get('league')
 		scope = request.POST.get('scope')
 		# Get the most recent contest record for the selected league, and determine 
-		# the cuurrent season for that league
+		# the current season for that league
 		contest = Contest.objects.filter(league=league).order_by('-id')[0]
 		season = contest.season
 		user = request.user
 		# Get all of the result records for the user for the current league and season
 		results = Result.objects.filter(participant=user, contest__league=league, contest__season=season).order_by('-id')
-		if len(results) == 0:
+		if len(results) == 0 or len(results) == 1 and contest.status != "Complete":
 			message = "No " + league + " results yet"
 			messages.warning(request, message)
 			return redirect('beat_the_odds:results')
