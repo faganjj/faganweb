@@ -421,11 +421,11 @@ def ranking(request):
 			# than a queryset, and needs to be proceesed differently (using square brackets notation).
 			results = results.values('participant') \
 				.annotate(points=Sum('points'), wins=Sum('wins'), losses=Sum('losses'), ties=Sum('ties')).order_by('-points')
-			for result in results:
-				participant = User.objects.get(id=result['participant'])
-				result['participant'] = participant
 			position = 0
 			for result in results:
+				# Exclude users who do not have any results yet
+				participant = User.objects.get(id=result['participant'])
+				result['participant'] = participant
 				# For the user in position #1, display a congratulations message.
 				# Otherise, display a message informing the user where they ranked
 				# for the season to-date.

@@ -189,7 +189,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-# django_apscheduler can be diabled for the test environment
+# django_apscheduler can be disabled for the test environment
 if DEVELOPMENT_MODE is True:
     SCHEDULER_DEFAULT = True
 else:
@@ -209,3 +209,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # My settings
 LOGIN_URL = 'users:login'
+LOGIN_REDIRECT_URL = 'appslist:index'
