@@ -15,11 +15,15 @@ def register(request):
 		nextpage = request.POST.get('next')
 		form = UserCreationForm(data=request.POST)
 		if form.is_valid():
-
 			new_user = form.save()
 			# Log the user in and then redirect to the home page
 			login(request, new_user)
-			return redirect(request.POST.get('next'))
+			if 'app' in request.session:
+				nextpage = request.session['app']
+			else:
+				nextpage = 'appslist:index'
+			return redirect(nextpage)
+			# return redirect(request.POST.get('next'))
 
 	# Display a blank or invalid form
 	context = {'form': form, 'next': nextpage}

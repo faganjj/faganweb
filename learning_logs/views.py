@@ -8,6 +8,7 @@ from .forms import TopicForm, EntryForm
 # Create your views here.
 
 def index(request):
+	request.session['app'] = "learning_logs:index"
 	""" The home page for Learning Log """
 	return render(request, 'learning_logs/index.html')
 

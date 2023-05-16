@@ -22,6 +22,7 @@ def index(request):
 	# indicates the first record in the resulting queryset, which will
 	# be the most recent).
 
+	request.session['app'] = "beat_the_odds:index"
 	try:
 		contest = Contest.objects.order_by('-id')[0]
 	except:

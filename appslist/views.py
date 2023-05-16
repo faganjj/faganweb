@@ -6,6 +6,7 @@ from .models import App
 
 def index(request):
 	""" Display all of the FaganWeb apps """
+	request.session['app'] = "appslist:index"
 	apps = App.objects.all().order_by('id')
 	context = {'apps': apps}
 	return render(request, 'appslist/index.html', context)
