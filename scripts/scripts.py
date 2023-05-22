@@ -423,6 +423,7 @@ def load_mlb_scores():
 	# For each game in gamelist, update the corresonding Game record, populating it with the scores
 	# and outcomes. 
 	for game in gamelist:
+		game_time = game['game_time']
 		team_away = game['team_away']
 		team_home = game['team_home']
 		score_away = game['score_away']
@@ -430,7 +431,7 @@ def load_mlb_scores():
 		outcome_away = game['outcome_away']
 		outcome_home = game['outcome_home']
 		try:
-			g = Game.objects.get(contest=contest, team_away=team_away, team_home=team_home)
+			g = Game.objects.get(contest=contest, team_away=team_away, team_home=team_home, game_time=game_time)
 		except:
 			# If the game record does not exist, log a warning message.  This is likely because odds
 			# for this game had not been posted in time, so it was not included in the contest.
