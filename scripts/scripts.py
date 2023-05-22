@@ -300,7 +300,7 @@ def load_mlb_scores():
 	# Issue an API call to get the latest scores in JSON format
 	SPORT = "baseball_mlb"
 	API_KEY = "f13fe3a3f1ea67d9a1c15d549efc719e"
-	url = 'https://api.the-odds-api.com/v4/sports/' + SPORT + '/scores/?apiKey=' + API_KEY + '&daysFrom=2'
+	url = 'https://api.the-odds-api.com/v4/sports/' + SPORT + '/scores/?apiKey=' + API_KEY + '&daysFrom=1'
 	r = requests.get(url)
 	odds_data = r.json()
 
