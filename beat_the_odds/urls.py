@@ -14,6 +14,4 @@ urlpatterns = [
 	path('results/', views.results, name='results'),
 	# Page for displaying rankings
 	path('ranking/', views.ranking, name='ranking'),
-	# Page for tallying the points at the end of a contest
-	path('tally/', views.tally, name='tally'),
 ]

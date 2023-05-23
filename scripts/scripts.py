@@ -473,35 +473,35 @@ def load_mlb_scores():
 	for result in results:
 		participant = result.participant
 		picks = Pick.objects.filter(contest=contest, participant=participant)
-		mypicks = []
-		for pick in picks:
-			mypicks.append(pick.abbrev)
+		# mypicks = []
+		# for pick in picks:
+		# 	mypicks.append(pick.abbrev)
 		wins = losses = ties = points = 0
 		games = contest.game_set.all().order_by('game_date', 'game_time')
 		for game in games:
-			if game.team_away in mypicks:
-				if game.outcome_away == "W":
+			for pick in picks:
+				if game.outcome_away == "W" and game.team_away == pick.abbrev and game.game_time == pick.game_time:
 					wins += 1
 					if game.odds_away > 0:
 						points += game.odds_away
 					else:
 						points += round(-100 / (game.odds_away/100))
-				if game.outcome_away == "L":
+				if game.outcome_away == "L" and game.team_away == pick.abbrev and game.game_time == pick.game_time:
 					losses += 1
 					points -= 100
-				if game.outcome_away == "T":
+				if game.outcome_away == "T" and game.team_away == pick.abbrev and game.game_time == pick.game_time:
 					ties += 1
-			if game.team_home in mypicks:
-				if game.outcome_home == "W":
+			for pick in picks:
+				if game.outcome_home == "W" and game.team_home == pick.abbrev and game.game_time == pick.game_time:
 					wins += 1
 					if game.odds_home > 0:
 						points += game.odds_home
 					else:
 						points += round(-100 / (game.odds_home/100))
-				if game.outcome_home == "L":
+				if game.outcome_home == "L" and game.team_home == pick.abbrev and game.game_time == pick.game_time:
 					losses += 1
 					points -= 100
-				if game.outcome_home == "T":
+				if game.outcome_home == "T" and game.team_home == pick.abbrev and game.game_time == pick.game_time:
 					ties += 1
 		result.wins = wins
 		result.losses = losses
