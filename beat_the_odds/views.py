@@ -6,7 +6,7 @@ from datetime import datetime, date, time, timedelta
 from zoneinfo import ZoneInfo
 from django.db.models import Sum
 
-from .models import Contest, Team, Game, Result, Pick, User, Test
+from .models import Contest, Team, Game, Result, Pick, User
 # from .forms import PicksForm
 
 # The following statement allows messages to be logged to the console
@@ -21,9 +21,6 @@ def index(request):
 	# contest.id.  Note:  The "-" indicates descending order.  The [0]
 	# indicates the first record in the resulting queryset, which will
 	# be the most recent).
-
-	t = Test(val=request.user)
-	t.save()
 
 	request.session['app'] = "beat_the_odds:index"
 	try:

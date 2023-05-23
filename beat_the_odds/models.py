@@ -87,10 +87,3 @@ class OddsCount(models.Model):
 	def __str__(self):
 		return f"{self.date} - {self.time} - {self.name} - {self.count}"
 
-
-class Test(models.Model):
-	val = models.CharField(max_length=30, blank=True)
-	pts = models.IntegerField(null=True, blank=True)
-
-	def __str__(self):
-		return f"{self.val}"
