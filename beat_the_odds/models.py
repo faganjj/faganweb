@@ -40,6 +40,7 @@ class Team(models.Model):
  
 class Game(models.Model):
 	contest = models.ForeignKey(Contest, on_delete=models.CASCADE)
+	game_id = models.CharField(max_length=40, blank=True)
 	game_date = models.DateField()
 	game_time = models.TimeField()
 	team_away = models.CharField(max_length=3)
@@ -73,6 +74,7 @@ class Pick(models.Model):
 	participant = models.ForeignKey(User, on_delete=models.CASCADE)
 	abbrev = models.CharField(max_length=3)
 	game_time = models.TimeField()
+	game_id = models.CharField(max_length=40, blank=True)
 
 	def __str__(self):
 		return f"{self.contest.league} - {self.contest.season} - {self.contest.period} - {self.participant.username} - {self.abbrev} - {self.game_time}"

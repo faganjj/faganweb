@@ -137,6 +137,7 @@ def load_mlb_odds():
 		# Separate the date/time into two variables, one for date and one for time.
 		game_date = game_datetime_ET.date()
 		game_time = game_datetime_ET.time()
+		game_id = game['id']
 
 		# If the game date is not equal to the contest date, skip this game and proceed to the next.
 		if game_date != compare_date:
@@ -199,6 +200,7 @@ def load_mlb_odds():
 		# Create an empty dictionary which will be used to contain data for a specific game.
 		gamedict = {}
 		# Load the dictionary with data that will be used to populate a Game record in the database.
+		gamedict['game_id'] = game_id
 		gamedict['game_date'] = game_date
 		gamedict['game_time'] = game_time
 		gamedict['team_away'] = team_away
@@ -242,13 +244,14 @@ def load_mlb_odds():
 	# For each game in gamelist, create a new Game record, associate it with the Contest record (via the
 	# foreigb key field), and populate it with the game date, game time, team names, and Moneyline odds. 
 	for game in gamelist:
+		game_id = game['game_id']
 		game_date = game['game_date']
 		game_time = game['game_time']
 		team_away = game['team_away']
 		team_home = game['team_home']
 		odds_away = game['odds_away']
 		odds_home = game['odds_home']
-		g = Game(contest=c, game_date=game_date, game_time=game_time, team_away=team_away, team_home=team_home, \
+		g = Game(contest=c, game_id=game_id, game_date=game_date, game_time=game_time, team_away=team_away, team_home=team_home, \
 			odds_away=odds_away, odds_home=odds_home)
 		g.save()
 
@@ -264,25 +267,29 @@ def load_mlb_odds():
 		gamedict = {}
 		gamedict['abbrev'] = game['team_away']
 		gamedict['game_time'] = game['game_time']
+		gamedict['game_id'] = game['game_id']
 		gamedict['odds'] = game['odds_away']
 		picklist.append(gamedict)
 		gamedict = {}
 		gamedict['abbrev'] = game['team_home']
 		gamedict['game_time'] = game['game_time']
+		gamedict['game_id'] = game['game_id']
 		gamedict['odds'] = game['odds_home']
 		picklist.append(gamedict)
 	picklist.sort(key=itemgetter('odds'))
 	for pick in picklist[:5]:
 		abbrev = pick['abbrev']
 		game_time = pick['game_time']
-		p = Pick(contest=c, participant=favorite, abbrev=abbrev, game_time=game_time)
+		game_id = pick['game_id']
+		p = Pick(contest=c, participant=favorite, abbrev=abbrev, game_time=game_time, game_id=game_id)
 		p.save()
 	r = Result(participant=favorite, contest=c, wins=0, losses=0, ties=0, points=0)
 	r.save()
 	for pick in picklist[-5:]:
 		abbrev = pick['abbrev']
 		game_time = pick['game_time']
-		p = Pick(contest=c, participant=underdog, abbrev=abbrev, game_time=game_time)
+		game_id = pick['game_id']
+		p = Pick(contest=c, participant=underdog, abbrev=abbrev, game_time=game_time, game_id=game_id)
 		p.save()
 	r = Result(participant=underdog, contest=c, wins=0, losses=0, ties=0, points=0)
 	r.save()
@@ -324,6 +331,7 @@ def load_mlb_scores():
 	for game in odds_data:
 		game_error_found = False
 
+		game_id = game['id']
 		game_datetime_UTC = datetime.fromisoformat(game['commence_time'].replace('Z', '+00:00'))
 		game_datetime_ET = game_datetime_UTC.astimezone(ZoneInfo("America/New_York"))
 		game_date = game_datetime_ET.date()
@@ -335,7 +343,7 @@ def load_mlb_scores():
 		try:
 			team = Team.objects.get(name=name_away)
 		except:
-			gme_error_found = True
+			game_error_found = True
 			error_found = True
 			message = "No match found for team name " + name_away
 			logger.error(message)
@@ -387,6 +395,7 @@ def load_mlb_scores():
 
 		game_count += 1
 		gamedict = {}
+		gamedict['game_id'] = game_id
 		gamedict['game_date'] = game_date
 		gamedict['game_time'] = game_time
 		gamedict['team_away'] = team_away
@@ -423,6 +432,7 @@ def load_mlb_scores():
 	# For each game in gamelist, update the corresonding Game record, populating it with the scores
 	# and outcomes. 
 	for game in gamelist:
+		game_id = game_id
 		game_time = game['game_time']
 		team_away = game['team_away']
 		team_home = game['team_home']
@@ -431,7 +441,7 @@ def load_mlb_scores():
 		outcome_away = game['outcome_away']
 		outcome_home = game['outcome_home']
 		try:
-			g = Game.objects.get(contest=contest, team_away=team_away, team_home=team_home, game_time=game_time)
+			g = Game.objects.get(contest=contest, team_away=team_away, team_home=team_home, game_id=game_id)
 		except:
 			# If the game record does not exist, log a warning message.  This is likely because odds
 			# for this game had not been posted in time, so it was not included in the contest.
@@ -480,28 +490,28 @@ def load_mlb_scores():
 		games = contest.game_set.all().order_by('game_date', 'game_time')
 		for game in games:
 			for pick in picks:
-				if game.outcome_away == "W" and game.team_away == pick.abbrev and game.game_time == pick.game_time:
+				if game.outcome_away == "W" and game.team_away == pick.abbrev and game.game_id == pick.game_id:
 					wins += 1
 					if game.odds_away > 0:
 						points += game.odds_away
 					else:
 						points += round(-100 / (game.odds_away/100))
-				if game.outcome_away == "L" and game.team_away == pick.abbrev and game.game_time == pick.game_time:
+				if game.outcome_away == "L" and game.team_away == pick.abbrev and game.game_id == pick.game_id:
 					losses += 1
 					points -= 100
-				if game.outcome_away == "T" and game.team_away == pick.abbrev and game.game_time == pick.game_time:
+				if game.outcome_away == "T" and game.team_away == pick.abbrev and game.game_id == pick.game_id:
 					ties += 1
 			for pick in picks:
-				if game.outcome_home == "W" and game.team_home == pick.abbrev and game.game_time == pick.game_time:
+				if game.outcome_home == "W" and game.team_home == pick.abbrev and game.game_id == pick.game_id:
 					wins += 1
 					if game.odds_home > 0:
 						points += game.odds_home
 					else:
 						points += round(-100 / (game.odds_home/100))
-				if game.outcome_home == "L" and game.team_home == pick.abbrev and game.game_time == pick.game_time:
+				if game.outcome_home == "L" and game.team_home == pick.abbrev and game.game_id == pick.game_id:
 					losses += 1
 					points -= 100
-				if game.outcome_home == "T" and game.team_home == pick.abbrev and game.game_time == pick.game_time:
+				if game.outcome_home == "T" and game.team_home == pick.abbrev and game.game_id == pick.game_id:
 					ties += 1
 		result.wins = wins
 		result.losses = losses

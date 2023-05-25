@@ -47,8 +47,7 @@ def index(request):
 		league = request.POST.get('league')
 
 	# Check if there is an active contest for the selected league.
-	# If so, redirect to the index view.  If not, issue a 
-	# warning message and re-render index.html
+	# If not, issue a warning message and re-direct to the index view. 
 		try:
 			Contest.objects.get(league=league, status='Active') 
 		except:
@@ -89,7 +88,11 @@ def index(request):
 				Pick.objects.filter(contest=contest, participant=user).delete()
 				for pick in mypicks:
 					abbrev, game_time = pick.split(",")
-					p = Pick(contest=contest, participant=request.user, abbrev=abbrev, game_time=game_time)
+					try:
+						g = Game.objects.get(contest=contest, team_away=abbrev, game_time=game_time)
+					except:
+						g = Game.objects.get(contest=contest, team_home=abbrev, game_time=game_time)
+					p = Pick(contest=contest, participant=request.user, abbrev=abbrev, game_time=game_time, game_id=g.game_id)
 					p.save()
 				try:
 					Result.objects.get(participant=user, contest=contest)
@@ -321,8 +324,8 @@ def results(request):
 
 			for game in games:
 				for pick in picks:
-					if (game.team_away == pick.abbrev and game.game_time == pick.game_time) \
-					or (game.team_home == pick.abbrev and game.game_time == pick.game_time):
+					if (game.team_away == pick.abbrev and game.game_id == pick.game_id) \
+					or (game.team_home == pick.abbrev and game.game_id == pick.game_id):
 						pick_count += 1
 						game.period = period
 						game.picknum = pick_count
@@ -332,38 +335,36 @@ def results(request):
 						game.name_away = team_away.name
 						team_home = Team.objects.get(league=league, abbrev=game.team_home)
 						game.name_home = team_home.name
-						for pick in picks:
-							if game.team_away == pick.abbrev and game.game_time == pick.game_time:
-								game.picked_away = True
-								if game.status == "Complete":
-									if game.odds_away > 0:
-										game.points_away = game.odds_away
-									else:
-										game.points_away = round(-100 / (game.odds_away/100))
-									if game.outcome_away == "W":
-										game.mypoints = game.points_away
-									elif game.outcome_away == "L":
-										game.mypoints = -100
-									elif game.outcome_away == "T":
-										game.mypoints = 0
-									mytotal += game.mypoints
-									game.mytotal = mytotal 
-						for pick in picks:
-							if game.team_home == pick.abbrev and game.game_time == pick.game_time:
-								game.picked_home = True
-								if game.status == "Complete":
-									if game.odds_home > 0:
-										game.points_home = game.odds_home
-									else:
-										game.points_home = round(-100 / (game.odds_home/100))	
-									if game.outcome_home == "W":
-										game.mypoints = game.points_home
-									elif game.outcome_home == "L":
-										game.mypoints = -100
-									elif game.outcome_home == "T":
-										game.mypoints = 0
-									mytotal += game.mypoints
-									game.mytotal = mytotal
+						if game.team_away == pick.abbrev and game.game_id == pick.game_id:
+							game.picked_away = True
+							if game.status == "Complete":
+								if game.odds_away > 0:
+									game.points_away = game.odds_away
+								else:
+									game.points_away = round(-100 / (game.odds_away/100))
+								if game.outcome_away == "W":
+									game.mypoints = game.points_away
+								elif game.outcome_away == "L":
+									game.mypoints = -100
+								elif game.outcome_away == "T":
+									game.mypoints = 0
+								mytotal += game.mypoints
+								game.mytotal = mytotal 
+						if game.team_home == pick.abbrev and game.game_id == pick.game_id:
+							game.picked_home = True
+							if game.status == "Complete":
+								if game.odds_home > 0:
+									game.points_home = game.odds_home
+								else:
+									game.points_home = round(-100 / (game.odds_home/100))	
+								if game.outcome_home == "W":
+									game.mypoints = game.points_home
+								elif game.outcome_home == "L":
+									game.mypoints = -100
+								elif game.outcome_home == "T":
+									game.mypoints = 0
+								mytotal += game.mypoints
+								game.mytotal = mytotal
 						gamelist.append(game)
 		context = {'league': league, 'season': season, 'period': period, 'scope': scope, 'games': gamelist}
 	return render(request, 'beat_the_odds/results.html', context)
