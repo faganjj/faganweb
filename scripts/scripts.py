@@ -432,7 +432,7 @@ def load_mlb_scores():
 	# For each game in gamelist, update the corresonding Game record, populating it with the scores
 	# and outcomes. 
 	for game in gamelist:
-		game_id = ""
+		game_id = game['game_id']
 		game_time = game['game_time']
 		team_away = game['team_away']
 		team_home = game['team_home']
