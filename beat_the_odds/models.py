@@ -64,7 +64,7 @@ class Result(models.Model):
 	points = models.IntegerField()
 
 	def __str__(self):
-		return f"{self.participant.username}  ({self.contest.league} - {self.contest.season} - {self.contest.period})"	
+		return f"{self.participant.username}  ({self.contest.league}-{self.contest.season}-{self.contest.period})W{self.wins},L{self.losses},T{self.ties},P{self.points}"	
 
 	class Meta:
 		permissions = (("tally_results", "Tally results"),)
