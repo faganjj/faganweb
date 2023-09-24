@@ -46,7 +46,7 @@ def start():
 
 	scheduler.add_job(
 	  load_nfl_odds,
-	  trigger=CronTrigger(day_of_week="sat", hour="21", minute=55),  
+	  trigger=CronTrigger(day_of_week="sat", hour="22", minute=25),  
 	  id="load_nfl_odds",  # The `id` assigned to each job MUST be unique
 	  max_instances=1,
 	  replace_existing=True,
