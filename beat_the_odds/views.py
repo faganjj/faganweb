@@ -7,12 +7,7 @@ from zoneinfo import ZoneInfo
 from django.db.models import Sum
 
 from .models import Contest, Team, Game, Result, Pick, User
-# from .forms import PicksForm
 
-# The following statement allows messages to be logged to the console
-# Here's a link to an article that provides more info:
-# https://medium.com/@torkashvand/a-comprehensive-guide-to-logging-in-django-e041f311bcb7
-# logger = logging.getLogger("beat_the_odds.views")
 
 def index(request):
 	""" The home page for Beat the Odds """

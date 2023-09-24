@@ -14,7 +14,7 @@ from datetime import datetime
 
 from django_apscheduler import util
 
-from .scripts import load_mlb_odds, load_mlb_scores, delete_old_job_executions
+from .scripts import load_mlb_odds, load_mlb_scores, load_nfl_odds, load_nfl_scores, delete_old_job_executions
 
 from django.conf import settings
 
@@ -43,6 +43,24 @@ def start():
 	  replace_existing=True,
 	)
 	logger.info("Added job 'load_mlb_scores'.")
+
+	scheduler.add_job(
+	  load_nfl_odds,
+	  trigger=CronTrigger(day_of_week="sat", hour="21", minute=55),  
+	  id="load_nfl_odds",  # The `id` assigned to each job MUST be unique
+	  max_instances=1,
+	  replace_existing=True,
+	)
+	logger.info("Added job 'load_nfl_odds'.")
+
+	scheduler.add_job(
+	  load_nfl_scores,
+	  trigger=CronTrigger(day_of_week="tue", hour="03", minute=0),  
+	  id="load_nfl_scores",  # The `id` assigned to each job MUST be unique
+	  max_instances=1,
+	  replace_existing=True,
+	)
+	logger.info("Added job 'load_nfl_scores'.")
 
 	scheduler.add_job(
 	  delete_old_job_executions,
