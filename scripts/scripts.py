@@ -564,9 +564,9 @@ def load_nfl_odds():
 	current_time = datetime.now().time()
 
 	# Determine Thursday's date (which will be the start of the upcoming NFL week).  This assumes the script is running on a Tuesday.
-	compare_start_date = current_date + timedelta(days = -2)
+	compare_start_date = current_date + timedelta(days = 2)
 	# Determine next Monday's date (which will be the end of the upcoming NFL week).
-	compare_end_date = current_date + timedelta(days = 2)
+	compare_end_date = current_date + timedelta(days = 6)
 
 	# Check if a Contest record already exists for the upcoming period (tomorrow for MLB, 
 	# the upcoming weekend for NFL).  If so, log an informational message and return.
