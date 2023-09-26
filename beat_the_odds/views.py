@@ -282,14 +282,21 @@ def results(request):
 	if request.method == 'POST':
 		league = request.POST.get('league')
 		scope = request.POST.get('scope')
-		# Get the most recent contest record for the selected league, and determine 
-		# the current season for that league
-		contest = Contest.objects.filter(league=league).order_by('-id')[0]
+
+		# make sure there's at least one record with status of "Complete" for the 
+		# selected league.
+		try:
+			contest = Contest.objects.filter(league=league, status='Complete').order_by('-id')[0]
+		except:
+			message = "No " + league + " results yet"
+			messages.warning(request, message)
+			context = {'league': league, 'scope': scope}
+			return render(request, 'beat_the_odds/ranking.html', context)
 		season = contest.season
 		user = request.user
-		# Get all of the result records for the user for the current league and season
-		results = Result.objects.filter(participant=user, contest__league=league, contest__season=season).order_by('-id')
-		if len(results) == 0 or len(results) == 1 and contest.status != "Complete":
+		# Get all of the result records for the user for completed contests for the current league and season
+		results = Result.objects.filter(participant=user, contest__league=league, contest__season=season, contest__status='Complete').order_by('-id')
+		if len(results) == 0:
 			message = "No " + league + " results yet"
 			messages.warning(request, message)
 			context = {'league': league, 'scope': scope}
@@ -298,10 +305,16 @@ def results(request):
 		result_count = 0
 		gamelist = []
 		for result in results:
-			if result.contest.status == "Active":
-				continue
-			if result.contest.status == "Complete":
-				result_count +=1
+			# if result.contest.status == "Active":
+			# 	if scope == "latest":
+			# 		message = "No " + league + " results yet for " + result.contest.period
+			# 		messages.warning(request, message)
+			# 		context = {'league': league, 'scope': scope}
+			# 		return render(request, 'beat_the_odds/results.html', context)	
+			# 	else:	
+			# 		continue
+			# if result.contest.status == "Complete":
+			result_count +=1
 			if scope == "latest" and result_count > 1:
 				break
 			period = result.contest.period
