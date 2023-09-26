@@ -810,9 +810,9 @@ def load_nfl_scores():
     	of all users who participated in the day's contest """
 
 	# Issue an API call to get the latest scores in JSON format
-	SPORT = "ammericanfootball_nfl"
+	SPORT = "americanfootball_nfl"
 	API_KEY = "f13fe3a3f1ea67d9a1c15d549efc719e"
-	url = 'https://api.the-odds-api.com/v4/sports/' + SPORT + '/scores/?apiKey=' + API_KEY + '&daysFrom=1'
+	url = 'https://api.the-odds-api.com/v4/sports/' + SPORT + '/scores/?apiKey=' + API_KEY + '&daysFrom=2'
 	r = requests.get(url)
 	scores_data = r.json()
 
@@ -922,7 +922,7 @@ def load_nfl_scores():
 	# the prior weekend for NFL).  If no Contest record found, log an error message
 	# and terminate the process.
 	league = "NFL"
-	season = compare_date.strftime("%Y")
+	season = compare_start_date.strftime("%Y")
 	NFL_START_DATE = datetime.strptime(os.getenv('NFL_START_DATE'), "%Y-%m-%d")
 	NFL_START_DATE = NFL_START_DATE.date()
 	nfl_day_delta = compare_start_date + timedelta(days = 7) - NFL_START_DATE

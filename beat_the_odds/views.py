@@ -292,7 +292,8 @@ def results(request):
 		if len(results) == 0 or len(results) == 1 and contest.status != "Complete":
 			message = "No " + league + " results yet"
 			messages.warning(request, message)
-			return redirect('beat_the_odds:results')
+			context = {'league': league, 'scope': scope}
+			return render(request, 'beat_the_odds/results.html', context)
 		# Process the user's results records
 		result_count = 0
 		gamelist = []
@@ -391,7 +392,8 @@ def ranking(request):
 		except:
 			message = "No " + league + " results yet"
 			messages.warning(request, message)
-			return redirect('beat_the_odds:ranking')
+			context = {'league': league, 'scope': scope}
+			return render(request, 'beat_the_odds/ranking.html', context)
 		season = contest.season
 		period = contest.period
 		# If "Latest Contest" was selected from the scope dropdown, display the ranking
