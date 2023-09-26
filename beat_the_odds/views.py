@@ -44,7 +44,7 @@ def index(request):
 	# Check if there is an active contest for the selected league.
 	# If not, issue a warning message and re-direct to the index view. 
 		try:
-			Contest.objects.get(league=league, status='Active') 
+			contest = Contest.objects.get(league=league, status='Active') 
 		except:
 			message = "No active " + league + " contest"
 			messages.warning(request, message)
