@@ -107,6 +107,7 @@
 
 <form class="form-inline" action="{% url 'beat_the_odds:index'%}" method='post'>
 	{% csrf_token %}
+
 	<label class="lead" for="league">Select a league:</label>
 	<select class="ml-1" name="league" id="league">
 	  <option value="NFL" {% if league == "NFL" %}selected{% endif %}>NFL</option>

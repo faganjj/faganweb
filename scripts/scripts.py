@@ -812,7 +812,7 @@ def load_nfl_scores():
 	# Issue an API call to get the latest scores in JSON format
 	SPORT = "americanfootball_nfl"
 	API_KEY = "f13fe3a3f1ea67d9a1c15d549efc719e"
-	url = 'https://api.the-odds-api.com/v4/sports/' + SPORT + '/scores/?apiKey=' + API_KEY + '&daysFrom=2'
+	url = 'https://api.the-odds-api.com/v4/sports/' + SPORT + '/scores/?apiKey=' + API_KEY + '&daysFrom=1'
 	r = requests.get(url)
 	scores_data = r.json()
 
@@ -823,10 +823,8 @@ def load_nfl_scores():
 
 	# Get today's date
 	current_date = datetime.now().date()
-	# Determine last Thursday's date (which will be the start of the prior NFL week)
-	compare_start_date = current_date + timedelta(days = -5)
-	# Determine yesterday's date (which will be the end of the prior NFL week)
-	compare_end_date = current_date + timedelta(days = -1)
+	# Determine yesterday's date (which will be the date of the most recently completed NFL games)
+	compare_date = current_date + timedelta(days = -1)
 
 	# Process the data returned from the API call
 	gamelist = []
@@ -844,7 +842,7 @@ def load_nfl_scores():
 		game_date = game_datetime_ET.date()
 		game_time = game_datetime_ET.time()
 
-		if game_date < compare_start_date or game_date > compare_end_date:
+		if game_date != compare_date:
 			continue
 		name_away = game['away_team']
 		try:
@@ -966,21 +964,21 @@ def load_nfl_scores():
 		g.outcome_home = outcome_home
 		g.save()
 
-	# Now process the Game records in the database to see if any games were missing from odds_data
-	# (another potential indicator of a game that may have been suspended for rain or some other reason)
-	games = contest.game_set.all().order_by('game_date', 'game_time')
-	for game in games:
-		# Check if a game has an outcome of None
-		if game.outcome_away == "" and game.outcome_home == "":
-			# Treat the game as a 0-0 tie
-			game.score_away = 0
-			game.score_home = 0
-			game.outcome_away = "T"
-			game.outcome_home = "T"
-			game.save()
-			scores_missing += 1
-			message = "Scores missing for " + game.team_away + " vs " + game.team_home + ". Game canceled?"
-			logger.warning(message)
+	# # Now process the Game records in the database to see if any games were missing from odds_data
+	# # (another potential indicator of a game that may have been suspended for rain or some other reason)
+	# games = contest.game_set.all().order_by('game_date', 'game_time')
+	# for game in games:
+	# 	# Check if a game has an outcome of None
+	# 	if game.outcome_away == "" and game.outcome_home == "":
+	# 		# Treat the game as a 0-0 tie
+	# 		game.score_away = 0
+	# 		game.score_home = 0
+	# 		game.outcome_away = "T"
+	# 		game.outcome_home = "T"
+	# 		game.save()
+	# 		scores_missing += 1
+	# 		message = "Scores missing for " + game.team_away + " vs " + game.team_home + ". Game canceled?"
+	# 		logger.warning(message)
 
 	# If no picks were made for the contest, log a message and terminate the process.
 	results = Result.objects.filter(contest=contest)
@@ -988,6 +986,11 @@ def load_nfl_scores():
 		message = "There were no picks for the " + period + " contest."
 		logger.warning (message)
 		logger.info("NFL scores process completed successfully")
+		return
+
+	# Check day of week.  If it's any weekday other than Tuesday, terminate the process.
+	weekday = current_date.strftime("%A")
+	if weekday != "Tuesday":
 		return
 
 	# Tally up the points, wins, losses, and ties for each participant, and
