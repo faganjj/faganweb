@@ -46,7 +46,7 @@ def start():
 
 	scheduler.add_job(
 	  load_nfl_odds,
-	  trigger=CronTrigger(day_of_week="tue", hour="12", minute=0),  
+	  trigger=CronTrigger(day_of_week="tue", hour=12, minute=0),  
 	  id="load_nfl_odds",  # The `id` assigned to each job MUST be unique
 	  max_instances=1,
 	  replace_existing=True,
@@ -55,7 +55,7 @@ def start():
 
 	scheduler.add_job(
 	  load_nfl_scores,
-	  trigger=CronTrigger(day_of_week="fri,sun,mon,tue", hour="03", minute=0),  
+	  trigger=CronTrigger(day_of_week="fri,sun,mon,tue", hour=3, minute=0),  
 	  id="load_nfl_scores",  # The `id` assigned to each job MUST be unique
 	  max_instances=1,
 	  replace_existing=True,
@@ -65,7 +65,7 @@ def start():
 	scheduler.add_job(
 	  delete_old_job_executions,
 	  trigger=CronTrigger(
-	    day_of_week="mon", hour="00", minute="00"
+	    day_of_week="mon", hour=0, minute=0
 	  ),  # Midnight on Monday, before start of the next work week.
 	  id="delete_old_job_executions",
 	  max_instances=1,
