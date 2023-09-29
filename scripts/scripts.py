@@ -990,6 +990,9 @@ def load_nfl_scores():
 
 	# Check day of week.  If it's any weekday other than Tuesday, terminate the process.
 	weekday = current_date.strftime("%A")
+	yesterday = compare_date.strftime("%A")
+	message = "Scores updated for " + yesterday + "."
+	logger.info(message)
 	if weekday != "Tuesday":
 		return
 
