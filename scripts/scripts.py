@@ -920,10 +920,10 @@ def load_nfl_scores():
 	# the prior weekend for NFL).  If no Contest record found, log an error message
 	# and terminate the process.
 	league = "NFL"
-	season = compare_start_date.strftime("%Y")
+	season = compare_date.strftime("%Y")
 	NFL_START_DATE = datetime.strptime(os.getenv('NFL_START_DATE'), "%Y-%m-%d")
 	NFL_START_DATE = NFL_START_DATE.date()
-	nfl_day_delta = compare_start_date + timedelta(days = 7) - NFL_START_DATE
+	nfl_day_delta = compare_date + timedelta(days = 7) - NFL_START_DATE
 	nfl_week_num = nfl_day_delta.days / 7
 	nfl_week_num = int(nfl_week_num)
 	period = "Week " + str(nfl_week_num)
