@@ -51,6 +51,14 @@ def index(request):
 			return redirect('beat_the_odds:index')
 
 		user = request.user
+		# Get today's date.  It will be compared to each game date, to determine
+		# if the gsme can be legitimately picked.
+		compare_date = date.today()
+		compare_time = datetime.now().time()
+		# But if the contest record has been created for test purposes, set the 
+		# compare date to an arbitrary date in the past.
+		if contest.test_contest:
+			compare_date = date(2000,1,1)
 		# Get all of the game records for the active contest ("game_set" uses
 		# one-to-many relationship to get the game records).
 		games = contest.game_set.all().order_by('game_date', 'game_time')
@@ -68,7 +76,8 @@ def index(request):
 				valid=False
 				message = "You need to pick " + str(contest.num_picks) + " winners. You picked " + str(len(mypicks)) +". Please try again." 
 				messages.error(request, message)
-			# Make sure the user has not picked 2 winners for the same game.
+			# Make sure the user has not picked 2 winners for the same game.  Also, make sure they have not made a pick for a game that
+			# has already started.
 			for game in games:
 				compare_away = game.team_away + "," + game.game_time.strftime("%H:%M")
 				compare_home = game.team_home + "," + game.game_time.strftime("%H:%M")
@@ -76,6 +85,12 @@ def index(request):
 				if compare_away in mypicks and compare_home in mypicks:
 					valid=False
 					messages.error(request, "You picked 2 winners for the same game. Please try again.")
+				print(compare_date, compare_time)
+				print(game.game_date, game.game_time)
+				if (compare_away in mypicks or compare_home in mypicks) \
+				and (compare_date > game.game_date or (compare_date == game.game_date and compare_time > game.game_time)):
+					valid=False
+					messages.error(request, "You made a pick for a game that already started.")
 			# If picks are valid, delete any prior picks and save the new picks.
 			# Also, create an initialized Result record for the user.  It serves as a
 			# junction record between Contest and User.
@@ -109,14 +124,6 @@ def index(request):
 		season = contest.season
 		period = contest.period
 		num_picks = contest.num_picks
-		# Get today's date.  It will be compared to each game date, to determine
-		# if the gsme can be legitimately picked.
-		compare_date = date.today()
-		compare_time = datetime.now().time()
-		# But if the contest record has been created for test purposes, set the 
-		# compare date to an arbitrary date in the past.
-		if contest.test_contest:
-			compare_date = date(2000,1,1)
 		for game in games:
 			if compare_date < game.game_date or (compare_date == game.game_date and compare_time < game.game_time):
 				game.eligible = True
@@ -125,14 +132,14 @@ def index(request):
 			abbrev_away = game.team_away
 			compare_away = abbrev_away + "," + game.game_time.strftime("%H:%M")
 			if len(mypicks) > 0:
-				if compare_away in mypicks:
+				if compare_away in mypicks and game.eligible == True:
 					game.picked_away = True
 			team_away = Team.objects.get(league=league, abbrev=abbrev_away)
 			game.name_away = team_away.name
 			abbrev_home = game.team_home
 			compare_home = abbrev_home + "," + game.game_time.strftime("%H:%M")
 			if len(mypicks) > 0:
-				if compare_home in mypicks:
+				if compare_home in mypicks and game.eligible == True:
 					game.picked_home = True
 			team_home = Team.objects.get(league=league, abbrev=abbrev_home)
 			game.name_home = team_home.name
