@@ -132,14 +132,14 @@ def index(request):
 			abbrev_away = game.team_away
 			compare_away = abbrev_away + "," + game.game_time.strftime("%H:%M")
 			if len(mypicks) > 0:
-				if compare_away in mypicks and game.eligible == True:
+				if compare_away in mypicks:
 					game.picked_away = True
 			team_away = Team.objects.get(league=league, abbrev=abbrev_away)
 			game.name_away = team_away.name
 			abbrev_home = game.team_home
 			compare_home = abbrev_home + "," + game.game_time.strftime("%H:%M")
 			if len(mypicks) > 0:
-				if compare_home in mypicks and game.eligible == True:
+				if compare_home in mypicks:
 					game.picked_home = True
 			team_home = Team.objects.get(league=league, abbrev=abbrev_home)
 			game.name_home = team_home.name
