@@ -726,7 +726,7 @@ def load_nfl_odds():
 
 	# If odds were missing for any games and the time deadline has not been reached, log a warning message
 	# and terminate the process.
-	if warning_count > 0 and current_time < deadline:
+	if warning_count > 0:
 		message = "Warning - Odds missing for " + str(warning_count) + " game(s)."
 		logger.warning(message)
 		message = "NFL odds process not completed"
