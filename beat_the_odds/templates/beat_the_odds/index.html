@@ -165,12 +165,12 @@
         {% if game.picked_away == True %}
           <td class="pl-5 border-left"><input type=checkbox name="picks" value="{{ game.team_away }},{{ game.game_time|time:'G:i' }}" checked></td>
         {% else %}
-          <td class="pl-5 border-left"><input type=checkbox name="picks" value="{{ game.team_away }},{{ game.game_time|time:'G:i' }}"></td>
+          <td class="pl-5 border-left"><input type=checkbox></td>
         {% endif %}
       {% else %}
         {% if game.picked_away == True %}
           <td class="pl-5 border-left"><input type=checkbox checked disabled></td>
-          <input type="hidden" name="picks" value="{{ game.team_away }}">
+          <input type="hidden" name="picks" value="{{ game.team_away }},{{ game.game_time|time:'G:i' }}">
         {% else %}
           <td class="pl-5 border-left"><input type=checkbox disabled></td>
         {% endif %}
@@ -184,16 +184,16 @@
       <td class="text-right font-weight-bold">{{ game.points_away }}</td>
       {% if game.eligible == True %} 
         {% if game.picked_home == True %}
-          <td class="pl-5 border-left"><input type="checkbox" name="picks" value="{{ game.team_home }},{{ game.game_time|time:'G:i' }}" checked></td>
+          <td class="pl-5 border-left"><input type=checkbox name="picks" value="{{ game.team_home }},{{ game.game_time|time:'G:i' }}" checked></td>
         {% else %}
-          <td class="pl-5 border-left"><input type="checkbox" name="picks" value="{{ game.team_home }},{{ game.game_time|time:'G:i' }}"></td>
+          <td class="pl-5 border-left"><input type=checkbox></td>
         {% endif %}
       {% else %}
         {% if game.picked_home == True %}
-          <input type="hidden" name="picks" value="{{ game.team_home }}">
-          <td class="pl-5 border-left"><input type="checkbox" checked disabled></td>
+          <input type="hidden" name="picks" value="{{ game.team_home }},{{ game.game_time|time:'G:i' }}">
+          <td class="pl-5 border-left"><input type=checkbox checked disabled></td>
         {% else %}
-          <td class="pl-5 border-left"><input type="checkbox" disabled></td>
+          <td class="pl-5 border-left"><input type=checkbox disabled></td>
         {% endif %}
       {% endif %}  
       <td>{{ game.name_home }}</td>
