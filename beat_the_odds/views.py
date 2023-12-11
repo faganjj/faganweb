@@ -81,16 +81,13 @@ def index(request):
 			for game in games:
 				compare_away = game.team_away + "," + game.game_time.strftime("%H:%M")
 				compare_home = game.team_home + "," + game.game_time.strftime("%H:%M")
-				# compare_home = game.team_home + "," + str(game.game_time)
-				if game.eligible == True and compare_away in mypicks and compare_home in mypicks:
+				if compare_away in mypicks and compare_home in mypicks:
 					valid=False
 					messages.error(request, "You picked 2 winners for the same game. Please try again.")
-				print(compare_date, compare_time)
-				print(game.game_date, game.game_time)
-				if game.eligible == True and (compare_away in mypicks or compare_home in mypicks) \
-				and (compare_date > game.game_date or (compare_date == game.game_date and compare_time > game.game_time)):
-					valid=False
-					messages.error(request, "You made a pick for a game that already started.")
+				# if (compare_away in mypicks or compare_home in mypicks) \
+				# and (compare_date > game.game_date or (compare_date == game.game_date and compare_time > game.game_time)):
+				# 	valid=False
+				# 	messages.error(request, "You made a pick for a game that already started.")
 			# If picks are valid, delete any prior picks and save the new picks.
 			# Also, create an initialized Result record for the user.  It serves as a
 			# junction record between Contest and User.
