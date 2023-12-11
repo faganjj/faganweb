@@ -63,6 +63,7 @@ def index(request):
 		# one-to-many relationship to get the game records).
 		games = contest.game_set.all().order_by('game_date', 'game_time')
 		mypicks = []
+		oldpicks = []
 
 		# Check if the Submit button has been clicked.  If so, validate and
 		# save the picks.  If not, get the user's prior picks (if there are any)
@@ -76,18 +77,22 @@ def index(request):
 				valid=False
 				message = "You need to pick " + str(contest.num_picks) + " winners. You picked " + str(len(mypicks)) +". Please try again." 
 				messages.error(request, message)
-			# Make sure the user has not picked 2 winners for the same game.  Also, make sure they have not made a pick for a game that
-			# has already started.
 			for game in games:
+				# Make sure the user has not picked 2 winners for the same game.
 				compare_away = game.team_away + "," + game.game_time.strftime("%H:%M")
 				compare_home = game.team_home + "," + game.game_time.strftime("%H:%M")
 				if compare_away in mypicks and compare_home in mypicks:
 					valid=False
 					messages.error(request, "You picked 2 winners for the same game. Please try again.")
-				# if (compare_away in mypicks or compare_home in mypicks) \
-				# and (compare_date > game.game_date or (compare_date == game.game_date and compare_time > game.game_time)):
-				# 	valid=False
-				# 	messages.error(request, "You made a pick for a game that already started.")
+				# Also make sure the user has not made a pick for a game that has already started.
+				picks = Pick.objects.filter(contest=contest, participant=user)
+				for pick in picks:
+					compare_pick = pick.abbrev + "," + pick.game_time.strftime("%H:%M")
+					oldpicks.append(compare_pick)
+				if ((compare_away in mypicks and compare_away not in oldpicks) or (compare_home in mypicks and compare_home not in oldpicks)) \
+				and (compare_date > game.game_date or (compare_date == game.game_date and compare_time > game.game_time)):
+					valid=False
+					messages.error(request, "You made a pick for a game that already started.")
 			# If picks are valid, delete any prior picks and save the new picks.
 			# Also, create an initialized Result record for the user.  It serves as a
 			# junction record between Contest and User.
