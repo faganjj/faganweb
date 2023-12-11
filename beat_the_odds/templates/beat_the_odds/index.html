@@ -186,7 +186,7 @@
         {% if game.picked_home == True %}
           <td class="pl-5 border-left"><input type=checkbox name="picks" value="{{ game.team_home }},{{ game.game_time|time:'G:i' }}" checked></td>
         {% else %}
-          <td class="pl-5 border-left"><input type=checkbox name="picks" value="{{ game.team_away }},{{ game.game_time|time:'G:i' }}"></td>
+          <td class="pl-5 border-left"><input type=checkbox name="picks" value="{{ game.team_home }},{{ game.game_time|time:'G:i' }}"></td>
         {% endif %}
       {% else %}
         {% if game.picked_home == True %}
