@@ -82,12 +82,12 @@ def index(request):
 				compare_away = game.team_away + "," + game.game_time.strftime("%H:%M")
 				compare_home = game.team_home + "," + game.game_time.strftime("%H:%M")
 				# compare_home = game.team_home + "," + str(game.game_time)
-				if compare_away in mypicks and compare_home in mypicks:
+				if game.eligible == True and compare_away in mypicks and compare_home in mypicks:
 					valid=False
 					messages.error(request, "You picked 2 winners for the same game. Please try again.")
 				print(compare_date, compare_time)
 				print(game.game_date, game.game_time)
-				if (compare_away in mypicks or compare_home in mypicks) \
+				if game.eligible == True and (compare_away in mypicks or compare_home in mypicks) \
 				and (compare_date > game.game_date or (compare_date == game.game_date and compare_time > game.game_time)):
 					valid=False
 					messages.error(request, "You made a pick for a game that already started.")
