@@ -806,8 +806,9 @@ def load_nfl_odds():
 
 
 def load_nfl_scores():
-	""" This script runs on Tuesday morning after a week of NFL games.  It updates the scores of the games, and tallies the results
-    	of all users who participated in the day's contest """
+	""" This script runs on Friday, Saturday, Sunday, Monday, and Tuesday during a weekend of NFL games.
+	    It updates the scores of completed games.  And when it runs on Tuesday morning, it also tallies the results
+    	of all users who participated in the weekend's contest """
 
 	# Issue an API call to get the latest scores in JSON format
 	SPORT = "americanfootball_nfl"
@@ -823,8 +824,9 @@ def load_nfl_scores():
 
 	# Get today's date
 	current_date = datetime.now().date()
+	current_time = datetime.now().time()
 	# Determine yesterday's date (which will be the date of the most recently completed NFL games)
-	compare_date = current_date + timedelta(days = -1)
+	# compare_date = current_date + timedelta(days = -1)
 
 	# Process the data returned from the API call
 	gamelist = []
@@ -842,8 +844,9 @@ def load_nfl_scores():
 		game_date = game_datetime_ET.date()
 		game_time = game_datetime_ET.time()
 
-		if game_date != compare_date:
+		if game['completed'] == False:
 			continue
+
 		name_away = game['away_team']
 		try:
 			team = Team.objects.get(name=name_away)
@@ -920,10 +923,10 @@ def load_nfl_scores():
 	# the prior weekend for NFL).  If no Contest record found, log an error message
 	# and terminate the process.
 	league = "NFL"
-	season = compare_date.strftime("%Y")
+	season = current_date.strftime("%Y")
 	NFL_START_DATE = datetime.strptime(os.getenv('NFL_START_DATE'), "%Y-%m-%d")
 	NFL_START_DATE = NFL_START_DATE.date()
-	nfl_day_delta = compare_date + timedelta(days = 7) - NFL_START_DATE
+	nfl_day_delta = current_date + timedelta(days = 7) - NFL_START_DATE
 	nfl_week_num = nfl_day_delta.days / 7
 	nfl_week_num = int(nfl_week_num)
 	period = "Week " + str(nfl_week_num)
@@ -990,8 +993,7 @@ def load_nfl_scores():
 
 	# Check day of week.  If it's any weekday other than Tuesday, terminate the process.
 	weekday = current_date.strftime("%A")
-	yesterday = compare_date.strftime("%A")
-	message = "Scores updated for " + yesterday + "."
+	message = "Scores updated on " + weekday + " at " + str(current_time) + "."
 	logger.info(message)
 	if weekday != "Tuesday":
 		return

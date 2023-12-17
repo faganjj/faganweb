@@ -1,0 +1,5 @@
+DEBUG = True
+DEVELOPMENT_MODE = True
+NFL_START_DATE = "2023-09-07"
+BOOKMAKER = "draftkings"
+API_KEY = "f13fe3a3f1ea67d9a1c15d549efc719e"

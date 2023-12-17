@@ -8,8 +8,6 @@ app_name = 'beat_the_odds'
 urlpatterns = [
 	# Home page
 	path('', views.index, name='index'),
-	# Page for picking game winners
-	path('makepicks/<league>', views.makepicks, name='makepicks'),
 	# Page for displaying results
 	path('results/', views.results, name='results'),
 	# Page for displaying rankings
