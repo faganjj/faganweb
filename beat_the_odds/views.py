@@ -58,6 +58,7 @@ def index(request):
 	# if the game can be legitimately picked.
 	compare_date = date.today()
 	compare_time = datetime.now().time()
+	# messages.info(request, "Hello")
 	# But if the contest record has been created for test purposes, set the 
 	# compare date to an arbitrary date in the past.
 	if contest.test_contest:
@@ -95,7 +96,13 @@ def index(request):
 			if ((compare_away in mypicks and compare_away not in oldpicks) or (compare_home in mypicks and compare_home not in oldpicks)) \
 			and (compare_date > game.game_date or (compare_date == game.game_date and compare_time > game.game_time)):
 				valid=False
-				messages.error(request, "You made a pick for a game that already started.")
+				messages.error(request, "You made a pick for a game that already started. Please try again.")
+				return redirect('beat_the_odds:index')
+			if ((compare_away in oldpicks and compare_away not in mypicks) or (compare_home in oldpicks and compare_home not in mypicks)) \
+			and (compare_date > game.game_date or (compare_date == game.game_date and compare_time > game.game_time)):
+				valid=False
+				messages.error(request, "You changed a pick for a game that already started. Please try again.")
+				return redirect('beat_the_odds:index')				
 		# If picks are valid, delete any prior picks and save the new picks.
 		# Also, create an initialized Result record for the user.  It serves as a
 		# junction record between Contest and User.
