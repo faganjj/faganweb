@@ -75,9 +75,10 @@ class Pick(models.Model):
 	abbrev = models.CharField(max_length=3)
 	game_time = models.TimeField()
 	game_id = models.CharField(max_length=40, blank=True)
+	time_stamp = models.CharField(max_length=30, blank=True)
 
 	def __str__(self):
-		return f"{self.contest.league} - {self.contest.season} - {self.contest.period} - {self.participant.username} - {self.abbrev} - {self.game_time}"
+		return f"{self.contest.league} - {self.contest.season} - {self.contest.period} - {self.participant.username} - [{self.abbrev} - {self.game_time}]  -  {self.time_stamp}"
 
 
 class OddsCount(models.Model):

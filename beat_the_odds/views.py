@@ -88,7 +88,7 @@ def index(request):
 				valid=False
 				messages.error(request, "You picked 2 winners for the same game. Please try again.")
 			# Also make sure the user has not made a pick, or removed a pick, for a game that has already started.
-			picks = Pick.objects.filter(contest=contest, participant=user)
+			picks = Pick.objects.filter(contest=contest, participant=user).order_by('-time_stamp')[:5]
 			for pick in picks:
 				compare_pick = pick.abbrev + "," + pick.game_time.strftime("%H:%M")
 				oldpicks.append(compare_pick)
@@ -102,18 +102,19 @@ def index(request):
 				valid=False
 				messages.error(request, "You changed a pick for a game that has already started. Please try again.")
 				return redirect('beat_the_odds:index')				
-		# If picks are valid, delete any prior picks and save the new picks.
+		# If picks are valid, save the new picks.
 		# Also, create an initialized Result record for the user.  It serves as a
 		# junction record between Contest and User.
 		if valid == True:
-			Pick.objects.filter(contest=contest, participant=user).delete()
+			# Pick.objects.filter(contest=contest, participant=user).delete()
 			for pick in mypicks:
 				abbrev, game_time = pick.split(",")
 				try:
 					g = Game.objects.get(contest=contest, team_away=abbrev, game_time=game_time)
 				except:
 					g = Game.objects.get(contest=contest, team_home=abbrev, game_time=game_time)
-				p = Pick(contest=contest, participant=request.user, abbrev=abbrev, game_time=game_time, game_id=g.game_id)
+				time_stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+				p = Pick(contest=contest, participant=request.user, abbrev=abbrev, game_time=game_time, game_id=g.game_id, time_stamp=time_stamp)
 				p.save()
 			try:
 				Result.objects.get(participant=user, contest=contest)
@@ -123,7 +124,7 @@ def index(request):
 			messages.success(request, "Your picks have been submitted!")
 			return redirect('beat_the_odds:index')
 	else:
-		picks = Pick.objects.filter(contest=contest, participant=user)
+		picks = Pick.objects.filter(contest=contest, participant=user).order_by('-time_stamp')[:5]
 		for pick in picks:
 			compare_pick = pick.abbrev + "," + pick.game_time.strftime("%H:%M")
 			mypicks.append(compare_pick)
@@ -231,7 +232,7 @@ def results(request):
 			break
 		period = result.contest.period
 		# Get all of the user's picks for the contest associated with this result record.
-		picks = Pick.objects.filter(contest=result.contest, participant=result.participant)
+		picks = Pick.objects.filter(contest=result.contest, participant=result.participant).order_by('-time_stamp')[:5]
 		mypicks = []
 		for pick in picks:
 			mypicks.append(pick.abbrev)
