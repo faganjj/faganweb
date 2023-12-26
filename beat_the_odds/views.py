@@ -86,7 +86,7 @@ def index(request):
 			compare_home = game.team_home + "," + game.game_time.strftime("%H:%M")
 			if compare_away in mypicks and compare_home in mypicks:
 				valid=False
-				messages.error(request, "You picked 2 winners for the same game. Please try again.")
+				messages.error(request, "You picked two winners for the same game. Please try again.")
 			# Also make sure the user has not made a pick, or removed a pick, for a game that has already started.
 			picks = Pick.objects.filter(contest=contest, participant=user).order_by('-time_stamp')[:5]
 			for pick in picks:
