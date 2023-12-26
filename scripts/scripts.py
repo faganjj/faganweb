@@ -506,7 +506,7 @@ def load_mlb_scores():
 	# update their result record accordingly.
 	for result in results:
 		participant = result.participant
-		picks = Pick.objects.filter(contest=contest, participant=participant)
+		picks = Pick.objects.filter(contest=contest, participant=participant).order_by('-time_stamp')[:5]
 		wins = losses = ties = points = 0
 		games = contest.game_set.all().order_by('game_date', 'game_time')
 		for game in games:
@@ -1002,7 +1002,7 @@ def load_nfl_scores():
 	# update their result record accordingly.
 	for result in results:
 		participant = result.participant
-		picks = Pick.objects.filter(contest=contest, participant=participant)
+		picks = Pick.objects.filter(contest=contest, participant=participant).order_by('-time_stamp')[:5]
 		wins = losses = ties = points = 0
 		games = contest.game_set.all().order_by('game_date', 'game_time')
 		for game in games:
