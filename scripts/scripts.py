@@ -571,14 +571,14 @@ def load_nfl_odds():
 	# Check if a Contest record already exists for the upcoming period (tomorrow for MLB, 
 	# the upcoming weekend for NFL).  If so, log an informational message and return.
 	league = "NFL"
-	# The "season" format is a 4-digit year
-	season = compare_start_date.strftime("%Y")
-	# The "period" format is "mmm d" for MLB, "Week n" for NFL 
 	NFL_START_DATE = datetime.strptime(os.getenv('NFL_START_DATE'), "%Y-%m-%d")
 	NFL_START_DATE = NFL_START_DATE.date()
+	# The "season" format is a 4-digit year
+	season = NFL_START_DATE.strftime("%Y")
 	nfl_day_delta = compare_start_date + timedelta(days = 7) - NFL_START_DATE
 	nfl_week_num = nfl_day_delta.days / 7
 	nfl_week_num = int(nfl_week_num)
+	# The "period" format is "mmm d" for MLB, "Week n" for NFL 
 	period = "Week " + str(nfl_week_num)
 	contest = Contest.objects.filter(league=league, season=season, period=period)
 	if len(contest) > 0:
@@ -923,9 +923,9 @@ def load_nfl_scores():
 	# the prior weekend for NFL).  If no Contest record found, log an error message
 	# and terminate the process.
 	league = "NFL"
-	season = current_date.strftime("%Y")
 	NFL_START_DATE = datetime.strptime(os.getenv('NFL_START_DATE'), "%Y-%m-%d")
 	NFL_START_DATE = NFL_START_DATE.date()
+	season = NFL_START_DATE.strftime("%Y")
 	nfl_day_delta = current_date + timedelta(days = 7) - NFL_START_DATE
 	nfl_week_num = nfl_day_delta.days / 7
 	nfl_week_num = int(nfl_week_num)
