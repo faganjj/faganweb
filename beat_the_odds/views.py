@@ -88,7 +88,7 @@ def index(request):
 				valid=False
 				messages.error(request, "You picked two winners for the same game. Please try again.")
 			# Also make sure the user has not made a pick, or removed a pick, for a game that has already started.
-			picks = Pick.objects.filter(contest=contest, participant=user).order_by('-time_stamp')[:5]
+			picks = Pick.objects.filter(contest=contest, participant=user).order_by('-time_stamp')[:contest.num_picks]
 			for pick in picks:
 				compare_pick = pick.abbrev + "," + pick.game_time.strftime("%H:%M")
 				oldpicks.append(compare_pick)
@@ -124,7 +124,7 @@ def index(request):
 			messages.success(request, "Your picks have been submitted!")
 			return redirect('beat_the_odds:index')
 	else:
-		picks = Pick.objects.filter(contest=contest, participant=user).order_by('-time_stamp')[:5]
+		picks = Pick.objects.filter(contest=contest, participant=user).order_by('-time_stamp')[:contest.num_picks]
 		for pick in picks:
 			compare_pick = pick.abbrev + "," + pick.game_time.strftime("%H:%M")
 			mypicks.append(compare_pick)
@@ -232,7 +232,7 @@ def results(request):
 			break
 		period = result.contest.period
 		# Get all of the user's picks for the contest associated with this result record.
-		picks = Pick.objects.filter(contest=result.contest, participant=result.participant).order_by('-time_stamp')[:5]
+		picks = Pick.objects.filter(contest=result.contest, participant=result.participant).order_by('-time_stamp')[:contest.num_picks]
 		mypicks = []
 		for pick in picks:
 			mypicks.append(pick.abbrev)

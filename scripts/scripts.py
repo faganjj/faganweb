@@ -231,10 +231,13 @@ def load_mlb_odds():
 		# Add this game to the "gamelist" list.
 		gamelist.append(gamedict)
 
-	# If less than 5 valid games were found, log an error message and set error_found to True.
-	if game_count < 5:
+	# Get the number of picks to be made, which is stored in an environment variable.
+	num_picks = int(os.getenv('NUM_PICKS'))
+
+	# If the number of games found is less than the number of picks to be made, log an error message and set error_found to True.
+	if game_count < num_picks:
 		error_found = True
-		message = "Need 5 or more games. " + str(game_count) + " were found."
+		message = "Need " + str(num_picks) + " or more games. " + str(game_count) + " were found."
 		logger.error(message)
 
 	# If any errors were found during validation, log an error message and terminate the process.
@@ -259,7 +262,7 @@ def load_mlb_odds():
 		c.save()
 
 	# Create a new Contest record for the upcoming contest.
-	c = Contest(league= league, season=season, period=period, num_picks=5, status="Active")
+	c = Contest(league= league, season=season, period=period, num_picks=num_picks, status="Active")
 	c.save()
 
 	# For each game in gamelist, create a new Game record, associate it with the Contest record (via the
@@ -279,8 +282,8 @@ def load_mlb_odds():
 	# Log a message that the process has completed successfully.
 	logger.info("MLB odds process completed successfully for " + str(game_count) + " games.")
 
-	# Make FAVORITES and UNDERDOGS picks.  FAVORITES is a fake user who automatically picks the 5 biggest 
-	# favorites for each contest.  UNDERDOGS is another fake user who picks the 5 biggest underdogs.
+	# Make FAVORITES and UNDERDOGS picks.  FAVORITES is a fake user who automatically picks the biggest 
+	# favorites for each contest.  UNDERDOGS is another fake user who picks the biggest underdogs.
 
 	favorite = User.objects.get(username="FAVORITES")
 	underdog = User.objects.get(username="UNDERDOGS")
@@ -299,7 +302,7 @@ def load_mlb_odds():
 		gamedict['odds'] = game['odds_home']
 		picklist.append(gamedict)
 	picklist.sort(key=itemgetter('odds'))
-	for pick in picklist[:5]:
+	for pick in picklist[:num_picks]:
 		abbrev = pick['abbrev']
 		game_time = pick['game_time']
 		game_id = pick['game_id']
@@ -307,7 +310,7 @@ def load_mlb_odds():
 		p.save()
 	r = Result(participant=favorite, contest=c, wins=0, losses=0, ties=0, points=0)
 	r.save()
-	for pick in picklist[-5:]:
+	for pick in picklist[-num_picks:]:
 		abbrev = pick['abbrev']
 		game_time = pick['game_time']
 		game_id = pick['game_id']
@@ -506,7 +509,7 @@ def load_mlb_scores():
 	# update their result record accordingly.
 	for result in results:
 		participant = result.participant
-		picks = Pick.objects.filter(contest=contest, participant=participant).order_by('-time_stamp')[:5]
+		picks = Pick.objects.filter(contest=contest, participant=participant).order_by('-time_stamp')[:contest.num_picks]
 		wins = losses = ties = points = 0
 		games = contest.game_set.all().order_by('game_date', 'game_time')
 		for game in games:
@@ -712,10 +715,13 @@ def load_nfl_odds():
 		# Add this game to the "gamelist" list.
 		gamelist.append(gamedict)
 
-	# If less than 5 valid games were found, log an error message and set error_found to True.
-	if game_count < 5:
+	# Get the number of picks to be made, which is stored in an environment variable.
+	num_picks = int(os.getenv('NUM_PICKS'))
+
+	# If the number of games found is less than the number of picks to be made, log an error message and set error_found to True.
+	if game_count < num_picks:
 		error_found = True
-		message = "Need 5 or more games. " + str(game_count) + " were found."
+		message = "Need "+ str(num_picks) + " or more games. " + str(game_count) + " were found."
 		logger.error(message)
 
 	# If any errors were found during validation, log an error message and terminate the process.
@@ -740,7 +746,7 @@ def load_nfl_odds():
 		c.save()
 
 	# Create a new Contest record for the upcoming contest.
-	c = Contest(league= league, season=season, period=period, num_picks=5, status="Active")
+	c = Contest(league= league, season=season, period=period, num_picks=num_picks, status="Active")
 	c.save()
 
 	# For each game in gamelist, create a new Game record, associate it with the Contest record (via the
@@ -760,8 +766,8 @@ def load_nfl_odds():
 	# Log a message that the process has completed successfully.
 	logger.info("NFL odds process completed successfully for " + str(game_count) + " games.")
 
-	# Make FAVORITES and UNDERDOGS picks.  FAVORITES is a fake user who automatically picks the 5 biggest 
-	# favorites for each contest.  UNDERDOGS is another fake user who picks the 5 biggest underdogs.
+	# Make FAVORITES and UNDERDOGS picks.  FAVORITES is a fake user who automatically picks the biggest 
+	# favorites for each contest.  UNDERDOGS is another fake user who picks the biggest underdogs.
 
 	favorite = User.objects.get(username="FAVORITES")
 	underdog = User.objects.get(username="UNDERDOGS")
@@ -780,7 +786,7 @@ def load_nfl_odds():
 		gamedict['odds'] = game['odds_home']
 		picklist.append(gamedict)
 	picklist.sort(key=itemgetter('odds'))
-	for pick in picklist[:5]:
+	for pick in picklist[:num_picks]:
 		abbrev = pick['abbrev']
 		game_time = pick['game_time']
 		game_id = pick['game_id']
@@ -788,7 +794,7 @@ def load_nfl_odds():
 		p.save()
 	r = Result(participant=favorite, contest=c, wins=0, losses=0, ties=0, points=0)
 	r.save()
-	for pick in picklist[-5:]:
+	for pick in picklist[-num_picks:]:
 		abbrev = pick['abbrev']
 		game_time = pick['game_time']
 		game_id = pick['game_id']
@@ -915,9 +921,8 @@ def load_nfl_scores():
 		gamelist.append(gamedict)
 
 	if game_count == 0:
-		error_found == True
 		message = "No game records found."
-		logger.error(message)
+		logger.warning(message)
 
 	# Get the Contest record for the recently completed contest (yesterday for MLB, 
 	# the prior weekend for NFL).  If no Contest record found, log an error message
@@ -1002,7 +1007,7 @@ def load_nfl_scores():
 	# update their result record accordingly.
 	for result in results:
 		participant = result.participant
-		picks = Pick.objects.filter(contest=contest, participant=participant).order_by('-time_stamp')[:5]
+		picks = Pick.objects.filter(contest=contest, participant=participant).order_by('-time_stamp')[:contest.num_picks]
 		wins = losses = ties = points = 0
 		games = contest.game_set.all().order_by('game_date', 'game_time')
 		for game in games:
