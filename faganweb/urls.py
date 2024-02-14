@@ -22,4 +22,5 @@ urlpatterns = [
     path('', include('appslist.urls')),
     path('learning-log/', include('learning_logs.urls')),
     path('beat-the-odds/', include('beat_the_odds.urls')),
+    path('hola/', include('hola.urls')),
 ]

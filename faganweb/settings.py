@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'users',
     'appslist',
     'beat_the_odds',
+    'hola',
 
     
     # Third party apps
