@@ -13,6 +13,7 @@ CONTEST_STATUS = [
 LEAGUE_CHOICES = [
     ('NFL', 'NFL'),
     ('MLB', 'MLB'),
+    ('NHL', 'NHL'),
 ]
 
 class Contest(models.Model):

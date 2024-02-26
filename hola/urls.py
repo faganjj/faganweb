@@ -1,4 +1,4 @@
-""" Defines URL patterns for appslist """
+""" Defines URL patterns for hola """
 
 from django.urls import path
 

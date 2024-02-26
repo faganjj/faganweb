@@ -14,7 +14,7 @@
 </head>
 
   <nav class="navbar navbar-expand-md navbar-dark bg-primary mb-4 border" style="color:white">
-    <a class="navbar-brand" href="{% url 'learning_logs:index'%}">Learning Log</a>
+    <a class="navbar-brand" href="{% url 'learning_logs:index'%}">  Learning Log</a>
 
     <button class="navbar-toggler" type="button" data-toggle="collapse"
         data-target="#navbarCollapse" aria-controls="navbarCollapse"
@@ -24,10 +24,11 @@
     <div class="collapse navbar-collapse" id="navbarCollapse">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'learning_logs:topics' 'my'%}">
-              My Topics</a></li>
-          <a class="nav-link" href="{% url 'learning_logs:topics' 'all'%}">
-              All Topics</a></li>
+          <a class="nav-link" href="{% url 'learning_logs:topics' 'my'%}"> My Topics</a>
+        </li>
+        <li>
+          <a class="nav-link" href="{% url 'learning_logs:topics' 'all'%}">  All Topics</a>
+        </li>
       </ul>
 
       <ul class="navbar-nav ml-auto">

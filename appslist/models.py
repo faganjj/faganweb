@@ -9,6 +9,7 @@ class App(models.Model):
 	subdir = models.CharField(max_length = 20)
 	text = models.TextField()
 	active = models.BooleanField(default = False)
+	display_order = models.IntegerField()
 
 	def __str__(self):
 		""" Return a short string representation of the app """
