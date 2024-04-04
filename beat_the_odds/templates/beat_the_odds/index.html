@@ -35,7 +35,7 @@
 
 		  	<p class="lead">Choose "NFL" or "MLB" from the selection list  
 		  		and click "Make (or Change) Picks".  You'll be asked to pick the 
-		  		winners of a specified number of games (generally 5) for a weekend of 
+		  		winners of a specified number of games for a weekend of 
           NFL games or a day of MLB games. For MLB, odds for a particular day 
           are posted between 8:00pm and 10:00pm the prior evening. For NFL, 
           odds for a particular weekend are posted the prior Wednesday. </p>
@@ -135,7 +135,7 @@
 
 <h3>{{ league }} {{ season }} ({{ period }})</h3>
 <br>
-<h5 class="text-danger">Pick the winners of {{ num_picks }} games below and click the Submit button below. </h5>
+<h5 class="text-danger">Pick the winners of {{ num_picks }} games and click the Submit button below. </h5>
 <p class="text-danger">(You can change and re-submit your picks, but your pick for any particular game must be finalized before game time. Game times are Eastern Time.) </p>
 
 <form action="{% url 'beat_the_odds:index'%}" method='post'>

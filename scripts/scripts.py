@@ -232,10 +232,10 @@ def load_mlb_odds():
 		gamelist.append(gamedict)
 
 	# Get the number of picks to be made, which is stored in an environment variable.
-	num_picks = int(os.getenv('NUM_PICKS'))
+	num_picks = int(os.getenv('NUM_PICKS_MLB'))
 
 	# If the number of games found is less than the number of picks to be made, log an error message and set error_found to True.
-	if game_count < num_picks:
+	if num_picks > 0 and game_count < num_picks:
 		error_found = True
 		message = "Need " + str(num_picks) + " or more games. " + str(game_count) + " were found."
 		logger.error(message)
@@ -302,7 +302,7 @@ def load_mlb_odds():
 		gamedict['odds'] = game['odds_home']
 		picklist.append(gamedict)
 	picklist.sort(key=itemgetter('odds'))
-	for pick in picklist[:num_picks]:
+	for pick in picklist[:1]:
 		abbrev = pick['abbrev']
 		game_time = pick['game_time']
 		game_id = pick['game_id']
@@ -310,7 +310,7 @@ def load_mlb_odds():
 		p.save()
 	r = Result(participant=favorite, contest=c, wins=0, losses=0, ties=0, points=0)
 	r.save()
-	for pick in picklist[-num_picks:]:
+	for pick in picklist[-1:]:
 		abbrev = pick['abbrev']
 		game_time = pick['game_time']
 		game_id = pick['game_id']
@@ -509,7 +509,11 @@ def load_mlb_scores():
 	# update their result record accordingly.
 	for result in results:
 		participant = result.participant
-		picks = Pick.objects.filter(contest=contest, participant=participant).order_by('-time_stamp')[:contest.num_picks]
+		time_stamp = ""
+		picks = Pick.objects.filter(contest=contest, participant=user).order_by('-time_stamp')[:1]
+		for pick in picks:
+			time_stamp = pick.time_stamp
+		picks = Pick.objects.filter(contest=contest, participant=participant, time_stamp=time_stamp)
 		wins = losses = ties = points = 0
 		games = contest.game_set.all().order_by('game_date', 'game_time')
 		for game in games:
@@ -716,7 +720,7 @@ def load_nfl_odds():
 		gamelist.append(gamedict)
 
 	# Get the number of picks to be made, which is stored in an environment variable.
-	num_picks = int(os.getenv('NUM_PICKS'))
+	num_picks = int(os.getenv('NUM_PICKS_NFL'))
 
 	# If the number of games found is less than the number of picks to be made, log an error message and set error_found to True.
 	if game_count < num_picks:
@@ -1248,7 +1252,7 @@ def load_nhl_odds():
 		gamelist.append(gamedict)
 
 	# Get the number of picks to be made, which is stored in an environment variable.
-	num_picks = int(os.getenv('NUM_PICKS'))
+	num_picks = int(os.getenv('NUM_PICKS_NHL'))
 
 	# If the number of games found is less than the number of picks to be made, log an error message and set error_found to True.
 	if game_count < num_picks:

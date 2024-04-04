@@ -26,69 +26,69 @@ def start():
 	scheduler = BackgroundScheduler(timezone=settings.TIME_ZONE)
 	scheduler.add_jobstore(DjangoJobStore(), "default")
 
-	# scheduler.add_job(
-	#   load_mlb_odds,
-	#   trigger=CronTrigger(hour="20-22", minute=0),  
-	#   id="load_mlb_odds",  # The `id` assigned to each job MUST be unique
-	#   max_instances=1,
-	#   replace_existing=True,
-	# )
-	# logger.info("Added job 'load_mlb_odds'.")
-
-	# scheduler.add_job(
-	#   load_mlb_scores,
-	#   trigger=CronTrigger(hour="5-6", minute=0),  
-	#   id="load_mlb_scores",  # The `id` assigned to each job MUST be unique
-	#   max_instances=1,
-	#   replace_existing=True,
-	# )
-	# logger.info("Added job 'load_mlb_scores'.")
-
 	scheduler.add_job(
-	  load_nfl_odds,
-	  trigger=CronTrigger(day_of_week="tue", hour=12, minute=0),  
-	  id="load_nfl_odds",  # The `id` assigned to each job MUST be unique
+	  load_mlb_odds,
+	  trigger=CronTrigger(hour=11, minute=30),  
+	  id="load_mlb_odds",  # The `id` assigned to each job MUST be unique
 	  max_instances=1,
 	  replace_existing=True,
 	)
-	logger.info("Added job 'load_nfl_odds'.")
+	logger.info("Added job 'load_mlb_odds'.")
 
 	scheduler.add_job(
-	  load_nfl_scores,
-	  trigger=CronTrigger(day_of_week="fri,sat,sun,mon,tue", hour=3, minute=0),  
-	  id="load_nfl_scores",  # The `id` assigned to each job MUST be unique
-	  max_instances=1,
-	  replace_existing=True,
-	)
-	logger.info("Added job 'load_nfl_scores'.")
-
-	scheduler.add_job(
-	  load_nfl_scores,
-	  trigger=CronTrigger(day_of_week="sat,sun", hour=17, minute=0),  
-	  id="load_nfl_scores_2",  # The `id` assigned to each job MUST be unique
-	  max_instances=1,
-	  replace_existing=True,
-	)
-	logger.info("Added job 'load_nfl_scores'.")
-
-
-	scheduler.add_job(
-	  load_nhl_odds,
-	  trigger=CronTrigger(hour="20-22", minute=0),  
-	  id="load_nhl_odds",  # The `id` assigned to each job MUST be unique
-	  max_instances=1,
-	  replace_existing=True,
-	)
-	logger.info("Added job 'load_nhl_odds'.")
-
-	scheduler.add_job(
-	  load_nhl_scores,
+	  load_mlb_scores,
 	  trigger=CronTrigger(hour="5-6", minute=0),  
-	  id="load_nhl_scores",  # The `id` assigned to each job MUST be unique
+	  id="load_mlb_scores",  # The `id` assigned to each job MUST be unique
 	  max_instances=1,
 	  replace_existing=True,
 	)
 	logger.info("Added job 'load_mlb_scores'.")
+
+	# scheduler.add_job(
+	#   load_nfl_odds,
+	#   trigger=CronTrigger(day_of_week="tue", hour=12, minute=0),  
+	#   id="load_nfl_odds",  # The `id` assigned to each job MUST be unique
+	#   max_instances=1,
+	#   replace_existing=True,
+	# )
+	# logger.info("Added job 'load_nfl_odds'.")
+
+	# scheduler.add_job(
+	#   load_nfl_scores,
+	#   trigger=CronTrigger(day_of_week="fri,sat,sun,mon,tue", hour=3, minute=0),  
+	#   id="load_nfl_scores",  # The `id` assigned to each job MUST be unique
+	#   max_instances=1,
+	#   replace_existing=True,
+	# )
+	# logger.info("Added job 'load_nfl_scores'.")
+
+	# scheduler.add_job(
+	#   load_nfl_scores,
+	#   trigger=CronTrigger(day_of_week="sat,sun", hour=17, minute=0),  
+	#   id="load_nfl_scores_2",  # The `id` assigned to each job MUST be unique
+	#   max_instances=1,
+	#   replace_existing=True,
+	# )
+	# logger.info("Added job 'load_nfl_scores'.")
+
+
+	# scheduler.add_job(
+	#   load_nhl_odds,
+	#   trigger=CronTrigger(hour="20-22", minute=0),  
+	#   id="load_nhl_odds",  # The `id` assigned to each job MUST be unique
+	#   max_instances=1,
+	#   replace_existing=True,
+	# )
+	# logger.info("Added job 'load_nhl_odds'.")
+
+	# scheduler.add_job(
+	#   load_nhl_scores,
+	#   trigger=CronTrigger(hour="5-6", minute=0),  
+	#   id="load_nhl_scores",  # The `id` assigned to each job MUST be unique
+	#   max_instances=1,
+	#   replace_existing=True,
+	# )
+	# logger.info("Added job 'load_mlb_scores'.")
 
 	scheduler.add_job(
 	  delete_old_job_executions,

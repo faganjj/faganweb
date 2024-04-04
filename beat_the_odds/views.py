@@ -76,7 +76,11 @@ def index(request):
 		# Initialize 'valid' to True prior to validation.
 		valid = True
 		# Make sure the user has made the correct number of picks.
-		if len(mypicks) != contest.num_picks:
+		if len(mypicks) == 0 and contest.num_picks == 0:
+			message = "You need to pick at least 1 winner. You picked " + str(len(mypicks)) +". Please try again." 
+			messages.error(request, message)
+			return redirect('beat_the_odds:index')
+		if contest.num_picks > 0 and len(mypicks) != contest.num_picks:
 			valid=False
 			message = "You need to pick " + str(contest.num_picks) + " winners. You picked " + str(len(mypicks)) +". Please try again." 
 			messages.error(request, message)
@@ -88,7 +92,11 @@ def index(request):
 				valid=False
 				messages.error(request, "You picked two winners for the same game. Please try again.")
 			# Also make sure the user has not made a pick, or removed a pick, for a game that has already started.
-			picks = Pick.objects.filter(contest=contest, participant=user).order_by('-time_stamp')[:contest.num_picks]
+			time_stamp = ""
+			picks = Pick.objects.filter(contest=contest, participant=user).order_by('-time_stamp')[:1]
+			for pick in picks:
+				time_stamp = pick.time_stamp
+			picks = Pick.objects.filter(contest=contest, participant=user, time_stamp=time_stamp)
 			for pick in picks:
 				compare_pick = pick.abbrev + "," + pick.game_time.strftime("%H:%M")
 				oldpicks.append(compare_pick)
@@ -107,13 +115,13 @@ def index(request):
 		# junction record between Contest and User.
 		if valid == True:
 			# Pick.objects.filter(contest=contest, participant=user).delete()
+			time_stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 			for pick in mypicks:
 				abbrev, game_time = pick.split(",")
 				try:
 					g = Game.objects.get(contest=contest, team_away=abbrev, game_time=game_time)
 				except:
 					g = Game.objects.get(contest=contest, team_home=abbrev, game_time=game_time)
-				time_stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 				p = Pick(contest=contest, participant=request.user, abbrev=abbrev, game_time=game_time, game_id=g.game_id, time_stamp=time_stamp)
 				p.save()
 			try:
@@ -124,7 +132,11 @@ def index(request):
 			messages.success(request, "Your picks have been submitted!")
 			return redirect('beat_the_odds:index')
 	else:
-		picks = Pick.objects.filter(contest=contest, participant=user).order_by('-time_stamp')[:contest.num_picks]
+		time_stamp = ""
+		picks = Pick.objects.filter(contest=contest, participant=user).order_by('-time_stamp')[:1]
+		for pick in picks:
+			time_stamp = pick.time_stamp
+		picks = Pick.objects.filter(contest=contest, participant=user, time_stamp=time_stamp)
 		for pick in picks:
 			compare_pick = pick.abbrev + "," + pick.game_time.strftime("%H:%M")
 			mypicks.append(compare_pick)
@@ -135,7 +147,10 @@ def index(request):
 	# where to put checkmarks.
 	season = contest.season
 	period = contest.period
-	num_picks = contest.num_picks
+	if contest.num_picks == 0:
+		num_picks = "1 or more"
+	else:
+		num_picks = str(contest.num_picks)
 	for game in games:
 		if compare_date < game.game_date or (compare_date == game.game_date and compare_time < game.game_time):
 			game.eligible = True
@@ -232,7 +247,12 @@ def results(request):
 			break
 		period = result.contest.period
 		# Get all of the user's picks for the contest associated with this result record.
-		picks = Pick.objects.filter(contest=result.contest, participant=result.participant).order_by('-time_stamp')[:contest.num_picks]
+		time_stamp = ""
+		picks = Pick.objects.filter(contest=contest, participant=user).order_by('-time_stamp')[:1]
+		for pick in picks:
+			time_stamp = pick.time_stamp
+		picks = Pick.objects.filter(contest=result.contest, participant=result.participant, time_stamp=time_stamp)
+		num_picks = len(picks)
 		mypicks = []
 		for pick in picks:
 			mypicks.append(pick.abbrev)
@@ -252,7 +272,7 @@ def results(request):
 					pick_count += 1
 					game.period = period
 					game.picknum = pick_count
-					game.num_picks = result.contest.num_picks
+					game.num_picks = num_picks
 					game.status = result.contest.status
 					team_away = Team.objects.get(league=league, abbrev=game.team_away)
 					game.name_away = team_away.name

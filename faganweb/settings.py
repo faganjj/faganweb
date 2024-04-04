@@ -194,7 +194,7 @@ USE_TZ = True
 if DEVELOPMENT_MODE is True:
     SCHEDULER_DEFAULT = True
 else:
-    SCHEDULER_DEFAULT = True    
+    SCHEDULER_DEFAULT = True  
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
