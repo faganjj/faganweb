@@ -92,7 +92,6 @@ def load_mlb_odds():
 	# Determine tomorrow's date (which will be the contest date)
 	# compare_date = current_date
 	compare_date = current_date + timedelta(days = 1)
-	compare_date = current_date
 
 	# Check if a Contest record already exists for the upcoming period (tomorrow for MLB, 
 	# the upcoming weekend for NFL).  If so, log an informational message and return.
@@ -249,7 +248,7 @@ def load_mlb_odds():
 
 	# If odds were missing for any games and the time deadline has not been reached, log a warning message
 	# and terminate the process.
-	if warning_count > 0 and current_time < deadline:
+	if game_count == 0 or (warning_count > 0 and current_time < deadline):
 		message = "Warning - Odds missing for " + str(warning_count) + " game(s)."
 		logger.warning(message)
 		message = "MLB odds process not completed"
