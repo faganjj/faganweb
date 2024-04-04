@@ -92,6 +92,7 @@ def load_mlb_odds():
 	# Determine tomorrow's date (which will be the contest date)
 	# compare_date = current_date
 	compare_date = current_date + timedelta(days = 1)
+	compare_date = current_date
 
 	# Check if a Contest record already exists for the upcoming period (tomorrow for MLB, 
 	# the upcoming weekend for NFL).  If so, log an informational message and return.
