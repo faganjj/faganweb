@@ -510,7 +510,7 @@ def load_mlb_scores():
 	for result in results:
 		participant = result.participant
 		time_stamp = ""
-		picks = Pick.objects.filter(contest=contest, participant=user).order_by('-time_stamp')[:1]
+		picks = Pick.objects.filter(contest=contest, participant=participant).order_by('-time_stamp')[:1]
 		for pick in picks:
 			time_stamp = pick.time_stamp
 		picks = Pick.objects.filter(contest=contest, participant=participant, time_stamp=time_stamp)
