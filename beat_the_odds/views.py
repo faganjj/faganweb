@@ -248,7 +248,7 @@ def results(request):
 		period = result.contest.period
 		# Get all of the user's picks for the contest associated with this result record.
 		time_stamp = ""
-		picks = Pick.objects.filter(contest=contest, participant=results.participant).order_by('-time_stamp')[:1]
+		picks = Pick.objects.filter(contest=contest, participant=result.participant).order_by('-time_stamp')[:1]
 		for pick in picks:
 			time_stamp = pick.time_stamp
 		picks = Pick.objects.filter(contest=result.contest, participant=result.participant, time_stamp=time_stamp)
