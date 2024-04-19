@@ -23,10 +23,10 @@
   </select>
   <label class="lead ml-3" for="scope">Select scope:</label>  
   <select class="ml-1" name="scope" id="scope" onchange="this.form.submit()">
-    <option value="latest"{% if scope == "latest" %}selected{% endif %}>Latest Contest - My Results</option>  
-    <option value="all"{% if scope == "all" %}selected{% endif %}>Latest Contest - All Results</option>
-    <option value="season"{% if scope == "season" %}selected{% endif %}>Season To-Date - My Results</option>
-    <option value="alltime"{% if scope == "alltime" %}selected{% endif %}>All Seasons - My Results</option>  
+    <option value="latest"{% if scope == "latest" %}selected{% endif %}>Latest Contest (My Results)</option>  
+    <option value="all"{% if scope == "all" %}selected{% endif %}>Latest Contest (All Results)</option>
+    <option value="season"{% if scope == "season" %}selected{% endif %}>Season To-Date (My Results)</option>
+    <option value="alltime"{% if scope == "alltime" %}selected{% endif %}>All Seasons (My Results)</option>  
 
 
   </select>
