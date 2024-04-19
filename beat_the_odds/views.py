@@ -252,6 +252,7 @@ def results(request):
 		result_count +=1
 		if result_count > 1 and scope == "latest":
 			break
+		season = result.contest.season
 		period = result.contest.period
 		# Get all of the user's picks for the contest associated with this result record.
 		# Get the timestamp associated with the participant's most recent set of picks
@@ -279,6 +280,7 @@ def results(request):
 				if (game.team_away == pick.abbrev and game.game_id == pick.game_id) \
 				or (game.team_home == pick.abbrev and game.game_id == pick.game_id):
 					pick_count += 1
+					game.season = season
 					game.period = period
 					game.picknum = pick_count
 					game.num_picks = num_picks

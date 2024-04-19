@@ -50,11 +50,11 @@
     <div class="pb-3 mb-2 border-bottom">
 
     {% if scope == "latest" %}
-    <h4 class="mt-3">{{ league }} {{ season }} - {{ game.period }} {% if game.status == "Closed" %}: (In Progress) {% endif %}</h4>
+    <h4 class="mt-3">{{ league }} {{ game.season }} - {{ game.period }} {% if game.status == "Closed" %}: (In Progress) {% endif %}</h4>
     {% elif scope == "season" %}
-    <h4 class="mt-3">{{ league }} {{ season }} - {{ game.period }} {% if game.status == "Closed" %}: (In Progress) {% endif %}</h4>
+    <h4 class="mt-3">{{ league }} {{ game.season }} - {{ game.period }} {% if game.status == "Closed" %}: (In Progress) {% endif %}</h4>
     {% elif scope == "alltime" %}
-    <h4 class="mt-3">{{ league }} {{ season }} - {{ game.period }} {% if game.status == "Closed" %}: (In Progress) {% endif %}</h4>
+    <h4 class="mt-3">{{ league }} {{ game.season }} - {{ game.period }} {% if game.status == "Closed" %}: (In Progress) {% endif %}</h4>
     {% elif scope == "all" %}
     <h4 class="mt-3">{{ game.participant }}</h4>
     {% endif %}
