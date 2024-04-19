@@ -6,6 +6,8 @@
 <h2 class="text-center">Results for {{ user.username }}</h2>
 {% elif scope == "season" %}
 <h2 class="text-center">Results for {{ user.username }}</h2>
+{% elif scope == "alltime" %}
+<h2 class="text-center">Results for {{ user.username }}</h2>
 {% elif scope == "all" %}
 <h2 class="text-center">Results for {{ league }} {{ season }} - {{ period }} {% if game.status == "Closed" %}: (In Progress) {% endif %}</h2>
 {% endif %}
@@ -51,6 +53,8 @@
     <h4 class="mt-3">{{ league }} {{ season }} - {{ game.period }} {% if game.status == "Closed" %}: (In Progress) {% endif %}</h4>
     {% elif scope == "season" %}
     <h4 class="mt-3">{{ league }} {{ season }} - {{ game.period }} {% if game.status == "Closed" %}: (In Progress) {% endif %}</h4>
+    {% elif scope == "alltime" %}
+    <h4 class="mt-3">{{ league }} {{ season }} - {{ game.period }} {% if game.status == "Closed" %}: (In Progress) {% endif %}</h4>
     {% elif scope == "all" %}
     <h4 class="mt-3">{{ game.participant }}</h4>
     {% endif %}
@@ -62,7 +66,7 @@
     <table class="table-sm mb-3">
     <thead>
       <tr>
-        <th scope="col">Date</th>
+        <th scope="col">Date - Time</th>
         <th scope="col"></th>
         <th scope="col">Visiting Team</th>
         <th scope="col" class="text-center">Score</th>
