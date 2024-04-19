@@ -29,8 +29,8 @@ def index(request):
 	# default choice in the league dropdown list.
 	league = contest.league
 
-	# Check if the "Make Picks" button has been clicked.  If not, render 
-	# the index.html template.
+	# Check if a user is logged-in.  If so, render the index.html template.  If not, issue warning messages
+	# and start over.
 
 	if not request.user.is_authenticated:
 		messages.warning(request, 'You must be logged in to continue.  Click "Log in" in the navigation bar above.')
@@ -92,10 +92,12 @@ def index(request):
 				valid=False
 				messages.error(request, "You picked two winners for the same game. Please try again.")
 			# Also make sure the user has not made a pick, or removed a pick, for a game that has already started.
+			# Get the timestamp associated with the participant's most recent set of picks
 			time_stamp = ""
 			picks = Pick.objects.filter(contest=contest, participant=user).order_by('-time_stamp')[:1]
 			for pick in picks:
 				time_stamp = pick.time_stamp
+			# Use the timestamp to get the full set of picks containing that timestamp
 			picks = Pick.objects.filter(contest=contest, participant=user, time_stamp=time_stamp)
 			for pick in picks:
 				compare_pick = pick.abbrev + "," + pick.game_time.strftime("%H:%M")
@@ -132,10 +134,12 @@ def index(request):
 			messages.success(request, "Your picks have been submitted!")
 			return redirect('beat_the_odds:index')
 	else:
+		# Get the timestamp associated with the participant's most recent set of picks
 		time_stamp = ""
 		picks = Pick.objects.filter(contest=contest, participant=user).order_by('-time_stamp')[:1]
 		for pick in picks:
 			time_stamp = pick.time_stamp
+		# Use the timestamp to get the full set of picks containing that timestamp
 		picks = Pick.objects.filter(contest=contest, participant=user, time_stamp=time_stamp)
 		for pick in picks:
 			compare_pick = pick.abbrev + "," + pick.game_time.strftime("%H:%M")
@@ -218,9 +222,15 @@ def results(request):
 	season = contest.season
 	period = contest.period
 	user = request.user
-	if scope == "latest" or scope == "season":
+	if scope == "latest":
+		# Get the latest record for the user for the current league
+		results = Result.objects.filter(participant=user, contest__league=league, contest__season=season, contest__status='Complete').order_by('-id')[0]
+	elif scope == "season":
 		# Get all of the result records for the user for completed contests for the current league and season
 		results = Result.objects.filter(participant=user, contest__league=league, contest__season=season, contest__status='Complete').order_by('-id')
+	elif scope == "alltime":
+		# Get all of the result records for the user for completed contests for the current league across all seasons
+		results = Result.objects.filter(participant=user, contest__league=league, contest__status='Complete').order_by('-id')
 	else:
 		# Get all of the result records for all users for completed contests for the current period
 		results = Result.objects.filter(contest__period=period, contest__league=league, contest__season=season, contest__status='Complete').order_by('-id')	
@@ -243,14 +253,14 @@ def results(request):
 		# 		continue
 		# if result.contest.status == "Complete":
 		result_count +=1
-		if scope == "latest" and result_count > 1:
-			break
 		period = result.contest.period
 		# Get all of the user's picks for the contest associated with this result record.
+		# Get the timestamp associated with the participant's most recent set of picks
 		time_stamp = ""
 		picks = Pick.objects.filter(contest=result.contest, participant=result.participant).order_by('-time_stamp')[:1]
 		for pick in picks:
 			time_stamp = pick.time_stamp
+		# Use the timestamp to get the full set of picks containing that timestamp
 		picks = Pick.objects.filter(contest=result.contest, participant=result.participant, time_stamp=time_stamp)
 		num_picks = len(picks)
 		mypicks = []
@@ -364,9 +374,11 @@ def ranking(request):
 					messages.info(request, message)
 	else:
 		# Get result records for all users who participated in any contest for this 
-		# league within the current season contest, sorted by total points in descending 
-		# order.
-		results = Result.objects.filter(contest__league=league, contest__season=season).order_by('participant')
+		# league within the current season (or for all seasons), sorted by total points in descending order.
+		if scope == "season":
+			results = Result.objects.filter(contest__league=league, contest__season=season).order_by('participant')
+		elif scope == "alltime":
+			results = Result.objects.filter(contest__league=league).order_by('participant')
 		# Aggregate the points, wins, losses, and ties for the result records for each participant.
 		# Sort by total points in descending order.  Note that this produces a dictionary rather
 		# than a queryset, and needs to be proceesed differently (using square brackets notation).

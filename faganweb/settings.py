@@ -192,7 +192,7 @@ USE_TZ = True
 
 # django_apscheduler can be disabled for the test environment
 if DEVELOPMENT_MODE is True:
-    SCHEDULER_DEFAULT = True
+    SCHEDULER_DEFAULT = False
 else:
     SCHEDULER_DEFAULT = True  
 

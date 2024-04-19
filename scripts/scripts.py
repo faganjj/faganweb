@@ -159,7 +159,7 @@ def load_mlb_odds():
 		# sometimes changes between the time the odds are posted and the time the scores are posted.
 		game_id = game['id']
 
-		# If the game date is not equal to the contest date, skip this game and proceed to the next. (The API call
+		# If the game date is not equal to the contest date, skip this game and proceed to the next. (The API call to
 		# the-odds-api contains data for multiple days).
 		if game_date != compare_date:
 			continue
@@ -231,7 +231,8 @@ def load_mlb_odds():
 		# Add this game to the "gamelist" list.
 		gamelist.append(gamedict)
 
-	# Get the number of picks to be made, which is stored in an environment variable.
+	# Get the number of picks to be made, which is stored in an environment variable.  It the number of picks is set to 0,
+	# then any number of picks can be made.
 	num_picks = int(os.getenv('NUM_PICKS_MLB'))
 
 	# If the number of games found is less than the number of picks to be made, log an error message and set error_found to True.
@@ -287,6 +288,10 @@ def load_mlb_odds():
 
 	favorite = User.objects.get(username="FAVORITES")
 	underdog = User.objects.get(username="UNDERDOGS")
+	# If the number of picks is set to 0, then FAVORITES and UNDERDOGS will each make one pick.  FAVORITES will pick the single
+	# biggest favorite, and UNDERDOGS will pick the single biggest underdog.
+	if num_picks == 0:
+		num_picks = 5
 	picklist = []
 	for game in gamelist:
 		gamedict = {}
@@ -302,7 +307,7 @@ def load_mlb_odds():
 		gamedict['odds'] = game['odds_home']
 		picklist.append(gamedict)
 	picklist.sort(key=itemgetter('odds'))
-	for pick in picklist[:1]:
+	for pick in picklist[:num_picks]:
 		abbrev = pick['abbrev']
 		game_time = pick['game_time']
 		game_id = pick['game_id']
@@ -310,7 +315,7 @@ def load_mlb_odds():
 		p.save()
 	r = Result(participant=favorite, contest=c, wins=0, losses=0, ties=0, points=0)
 	r.save()
-	for pick in picklist[-1:]:
+	for pick in picklist[-num_picks:]:
 		abbrev = pick['abbrev']
 		game_time = pick['game_time']
 		game_id = pick['game_id']
@@ -509,10 +514,12 @@ def load_mlb_scores():
 	# update their result record accordingly.
 	for result in results:
 		participant = result.participant
+		# Get the timestamp associated with the participant's most recent set of picks
 		time_stamp = ""
 		picks = Pick.objects.filter(contest=contest, participant=participant).order_by('-time_stamp')[:1]
 		for pick in picks:
 			time_stamp = pick.time_stamp
+		# Use the timestamp to get the full set of picks containing that timestamp
 		picks = Pick.objects.filter(contest=contest, participant=participant, time_stamp=time_stamp)
 		wins = losses = ties = points = 0
 		games = contest.game_set.all().order_by('game_date', 'game_time')

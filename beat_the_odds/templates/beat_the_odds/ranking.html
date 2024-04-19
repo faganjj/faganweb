@@ -16,6 +16,7 @@
   <select class="ml-1" name="scope" id="scope" onchange="this.form.submit()">
     <option value="contest"{% if scope == "contest" %}selected{% endif %}>Latest Contest</option>
     <option value="season"{% if scope == "season" %}selected{% endif %}>Season To-Date</option>
+    <option value="alltime"{% if scope == "alltime" %}selected{% endif %}>All Seasons</option>
 
     <!--
     <option value="contest">Latest Contest</option>
