@@ -222,10 +222,7 @@ def results(request):
 	season = contest.season
 	period = contest.period
 	user = request.user
-	if scope == "latest":
-		# Get the latest record for the user for the current league
-		results = Result.objects.filter(participant=user, contest__league=league, contest__season=season, contest__status='Complete').order_by('-id')[0]
-	elif scope == "season":
+	if scope == "latest" or scope == "season":
 		# Get all of the result records for the user for completed contests for the current league and season
 		results = Result.objects.filter(participant=user, contest__league=league, contest__season=season, contest__status='Complete').order_by('-id')
 	elif scope == "alltime":
@@ -253,6 +250,8 @@ def results(request):
 		# 		continue
 		# if result.contest.status == "Complete":
 		result_count +=1
+		if result_count > 1 and scope == "latest":
+			break
 		period = result.contest.period
 		# Get all of the user's picks for the contest associated with this result record.
 		# Get the timestamp associated with the participant's most recent set of picks
